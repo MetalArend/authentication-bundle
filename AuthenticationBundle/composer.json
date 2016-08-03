@@ -1,0 +1,38 @@
+{
+  "name": "kuleuven/authentication-bundle",
+  "description": "Symfony3 Bundle for KU Leuven Shibboleth authentication, with LDAP and Person Data API integration",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "keywords": [
+    "authentication",
+    "security",
+    "shibboleth",
+    "ldap",
+    "API",
+    "kuleuven"
+  ],
+  "authors": [
+    {
+      "name": "Bart Reunes"
+    }
+  ],
+  "require": {
+    "php": ">=5.6",
+    "simplexml": "*",
+    "symfony/http-foundation": "^3.1",
+    "symfony/http-kernel": "^3.1",
+    "symfony/templating": "^3.1",
+    "symfony/config": "^3.1",
+    "symfony/dependency-injection": "^3.1",
+    "symfony/security": "^3.1",
+    "symfony/security-bundle": "^3.1",
+    "symfony/event-dispatcher": "^3.1",
+    "symfony/dom-crawler": "^3.1",
+    "psr/log": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kuleuven\\AuthenticationBundle\\": ""
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{% macro option(user) %}
+    {% if (kuleuven_shibboleth.sourceUser is not empty and kuleuven_shibboleth.sourceUser.username != user.uid) or (kuleuven_shibboleth.sourceUser is empty and kuleuven_shibboleth.user.username != user.uid) %}
+        <option value="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_switch_user': user.uid})) }}"
+                {% if kuleuven_shibboleth.sourceUser is not empty and kuleuven_shibboleth.user.username == user.uid %} selected="selected"{% endif %}>
+            {{ user.label }}
+        </option>
+    {% endif %}
+{% endmacro %}
+
+{% import _self as macros %}
+
+{% if is_granted('ROLE_ALLOWED_TO_SWITCH') or kuleuven_shibboleth.sourceUser is not empty %}
+    {% if kuleuven_shibboleth_extended_users is not empty %}
+        <!--suppress HtmlFormInputWithoutLabel -->
+        <select class="selectpicker" onchange="document.location.href = this.value;">
+            <option value="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"
+                    {% if kuleuven_shibboleth.sourceUser is empty %}selected="selected"{% endif %}>
+                Impersonate...
+            </option>
+            <optgroup label="Impersonate">
+                {% if not kuleuven_shibboleth.sourceUser is empty %}
+                    <option value="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_switch_user': '_exit'})) }}">
+                        Exit &rarr;
+                    </option>
+                {% endif %}
+            </optgroup>
+            {% for user in kuleuven_shibboleth_extended_users %}
+                {% if user.group is not defined %}
+                    {{ macros.option(user) }}
+                {% else %}
+                    <optgroup label="{{ user.group }}">
+                        {% for item in user.items %}
+                            {{ macros.option(item) }}
+                        {% endfor %}
+                    </optgroup>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% endif %}
+{% endif %}

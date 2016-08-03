@@ -1,0 +1,97 @@
+<div class="metrics">
+    <div class="metric">
+        <span class="value">{{ shibboleth.handlerPath }}</span>
+        <span class="label">Handler path</span>
+    </div>
+
+    <div class="metric">
+        <span class="value">{{ include('KuleuvenAuthenticationBundle:Icon:' ~ (shibboleth.securedHandler ? 'yes' : 'no') ~ '.svg.twig') }}</span>
+        <span class="label">Secured</span>
+    </div>
+
+    <div class="metric">
+        <span class="value">{{ include('KuleuvenAuthenticationBundle:Icon:' ~ (shibboleth.reachable ? 'yes' : 'no') ~ '.svg.twig') }}</span>
+        <span class="label">Reachable</span>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th scope="col" class="key">Parameter</th>
+        <th scope="col">Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>Status path</th>
+        <td>
+            {% if shibboleth.reachable %}
+                <a href="{{ shibboleth.statusUrl }}" target="_blank">
+                    {{ shibboleth.handlerPath }}{{ shibboleth.statusPath }}
+                </a>
+            {% else %}
+                {{ shibboleth.handlerPath }}{{ shibboleth.statusPath }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Session login path</th>
+        <td>
+            {% if shibboleth.reachable %}
+                <a href="{{ shibboleth.loginUrl }}" target="_blank">
+                    {{ shibboleth.handlerPath }}{{ shibboleth.sessionLoginPath }}
+                </a>
+            {% else %}
+                {{ shibboleth.handlerPath }}{{ shibboleth.sessionLoginPath }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Session logout path</th>
+        <td>
+            {% if shibboleth.reachable %}
+                <a href="{{ shibboleth.logoutUrl }}" target="_blank">
+                    {{ shibboleth.handlerPath }}{{ shibboleth.sessionLogoutPath }}
+                </a>
+            {% else %}
+                {{ shibboleth.handlerPath }}{{ shibboleth.sessionLogoutPath }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Session overview path</th>
+        <td>
+            {% if shibboleth.reachable %}
+                <a href="{{ shibboleth.overviewUrl }}" target="_blank">
+                    {{ shibboleth.handlerPath }}{{ shibboleth.sessionOverviewPath }}
+                </a>
+            {% else %}
+                {{ shibboleth.handlerPath }}{{ shibboleth.sessionOverviewPath }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Username attribute</th>
+        <td>{{ shibboleth.usernameAttribute }}</td>
+    </tr>
+    <tr>
+        <th>
+            <nobr>Authenticated attribute</nobr>
+        </th>
+        <td>{{ shibboleth.authenticatedAttribute }}</td>
+    </tr>
+    <tr>
+        <th>Logout url attribute</th>
+        <td>{{ shibboleth.logoutUrlAttribute }}</td>
+    </tr>
+    <tr>
+        <th>Default charset</th>
+        <td>{{ shibboleth.defaultCharset }}</td>
+    </tr>
+    {#<tr>#}
+    {#<th>Headers enabled</th>#}
+    {#<td>{{ shibboleth.useHeaders|json_encode }}</td>#}
+    {#</tr>#}
+    </tbody>
+</table>

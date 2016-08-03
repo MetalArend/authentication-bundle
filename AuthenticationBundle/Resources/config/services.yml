@@ -1,0 +1,241 @@
+parameters:
+
+    # Authentication
+
+    kuleuven_authentication.controller.default.class: 'Kuleuven\AuthenticationBundle\Controller\DefaultController'
+    kuleuven_authentication.controller.security.class: 'Kuleuven\AuthenticationBundle\Controller\SecurityController'
+    kuleuven_authentication.service.attributes_injector_manager.class: 'Kuleuven\AuthenticationBundle\Service\AttributesInjectionProviderManager'
+    kuleuven_authentication.service.parameter_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider'
+    kuleuven_authentication.service.firewall_helper.class: 'Kuleuven\AuthenticationBundle\Service\FirewallHelper'
+    twig.extension.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Twig\ShibbolethExtension'
+    data_collector.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Collector\AuthenticationDataCollector'
+
+    # Shibboleth
+
+    kuleuven_authentication.service.shibboleth_service_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider'
+    kuleuven_authentication.service.shibboleth_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider'
+    kuleuven_authentication.security.authentication.entry_point.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationEntryPoint'
+    kuleuven_authentication.security.authentication.provider.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationProvider'
+    kuleuven_authentication.security.authentication.listener.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListener'
+    kuleuven_authentication.security.http.logout.handler.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethHttpLogoutHandler'
+
+    # LDAP
+
+    kuleuven_authentication.controller.ldap.class: 'Kuleuven\AuthenticationBundle\Controller\LdapController'
+    kuleuven_authentication.service.ldap.class: 'Kuleuven\AuthenticationBundle\Service\LdapService'
+    kuleuven_authentication.service.ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapUserProvider'
+    kuleuven_authentication.service.ldap_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider'
+
+    # Person Data API
+
+    kuleuven_authentication.service.person_data.class: 'Kuleuven\AuthenticationBundle\Service\PersonDataService'
+
+    # Switch user
+
+    kuleuven_authentication.security.authentication.switchuser_listener.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethSwitchUserListener'
+    kuleuven_authentication.security.switch_user_persistence_subscriber.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethSwitchUserPersistenceSubscriber'
+
+services:
+
+    # Authentication
+
+    kuleuven_authentication.controller.default:
+        class: "%kuleuven_authentication.controller.default.class%"
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@templating"
+            - "%kernel.debug%"
+
+    kuleuven_authentication.controller.security:
+        class: "%kuleuven_authentication.controller.security.class%"
+
+    kuleuven_authentication.service.attributes_injector_manager:
+        class: "%kuleuven_authentication.service.attributes_injector_manager.class%"
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 255 }
+
+    kuleuven_authentication.service.parameter_attributes_provider:
+        class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
+        arguments:
+            - "%authentication_attribute_overwrites%"
+            - "%authentication_attribute_definitions%"
+        tags:
+            - { name: kuleuven_authentication.attributes_injector }
+
+    kuleuven_authentication.service.firewall_helper:
+        class: "%kuleuven_authentication.service.firewall_helper.class%"
+        public: false
+        arguments:
+            - "@request_stack"
+            - "@security.firewall.map"
+
+    twig.extension.kuleuven_authentication:
+        class: "%twig.extension.kuleuven_authentication.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+        tags:
+            - { name: twig.extension }
+
+    data_collector.kuleuven_authentication:
+        class: "%data_collector.kuleuven_authentication.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@security.token_storage"
+            - "@security.role_hierarchy"
+        tags:
+            -
+                name: data_collector
+                template: "KuleuvenAuthenticationBundle:Collector:index"
+                id: "kuleuven_authentication"
+                priority: "269"
+
+    # Shibboleth
+
+    kuleuven_authentication.service.shibboleth_service_provider:
+        class: "%kuleuven_authentication.service.shibboleth_service_provider.class%"
+        arguments:
+            - "@request_stack"
+            - "%shibboleth_is_secured_handler%"
+            - "%shibboleth_handler_path%"
+            - "%shibboleth_status_path%"
+            - "%shibboleth_session_login_path%"
+            - "%shibboleth_session_logout_path%"
+            - "%shibboleth_session_overview_path%"
+            - "%shibboleth_username_attribute%"
+            - "%shibboleth_authenticated_attribute%"
+            - "%shibboleth_logout_url_attribute%"
+            - "%shibboleth_default_charset%"
+            - "%authentication_attribute_definitions%"
+
+    kuleuven_authentication.service.shibboleth_user_provider:
+        class: "%kuleuven_authentication.service.shibboleth_user_provider.class%"
+        public: true
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+
+    kuleuven_authentication.security.authentication.entry_point:
+        class: "%kuleuven_authentication.security.authentication.entry_point.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+
+    kuleuven_authentication.security.authentication.provider:
+        class: "%kuleuven_authentication.security.authentication.provider.class%"
+        public: false
+        arguments:
+            - "" # userProvider
+            - "@security.user_checker"
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+
+    kuleuven_authentication.security.authentication.listener:
+        class: "%kuleuven_authentication.security.authentication.listener.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@security.token_storage"
+            - "@security.authentication.manager"
+            - "@kuleuven_authentication.security.authentication.entry_point"
+            - "@event_dispatcher"
+            - ""
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+
+    kuleuven_authentication.security.http.logout.handler:
+        class: "%kuleuven_authentication.security.http.logout.handler.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "%shibboleth_session_logout_target%"
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+
+    # LDAP
+
+    kuleuven_authentication.controller.ldap:
+        class:      "%kuleuven_authentication.controller.ldap.class%"
+        arguments:
+            - "@kuleuven_authentication.service.ldap"
+            - "%kernel.debug%"
+
+    kuleuven_authentication.service.ldap:
+        class:      "%kuleuven_authentication.service.ldap.class%"
+        arguments:
+            - "%ldap_rdn%"
+            - "%ldap_password%"
+            - "%ldap_base%"
+            - "%ldap_domain%"
+            - "%ldap_port%"
+        calls:
+            - [setSession, ['@session']]
+
+    kuleuven_authentication.service.ldap_user_provider:
+        class: "%kuleuven_authentication.service.ldap_user_provider.class%"
+        public: false
+        arguments:
+            - "@kuleuven_authentication.service.ldap_attributes_provider"
+
+    kuleuven_authentication.service.ldap_attributes_provider:
+        class: "%kuleuven_authentication.service.ldap_attributes_provider.class%"
+        arguments:
+            - "@kuleuven_authentication.service.ldap"
+            - "%authentication_attribute_ldap_filter%"
+            - "%authentication_attribute_definitions%"
+        tags:
+            - { name: kuleuven_authentication.attributes_injector }
+
+    # Person Data API
+
+    # https://admin.kuleuven.be/icts/services/dataservices/api/person
+    kuleuven_authentication.service.person_data:
+        class:      "%kuleuven_authentication.service.person_data.class%"
+        arguments:
+            - "%person_data_api_url%"
+
+    # Switch User
+
+    # Overwrite the switchuser_listener # TODO !!! instead of overwriting, add a new Security Factory
+    security.authentication.switchuser_listener:
+        class: "%kuleuven_authentication.security.authentication.switchuser_listener.class%"
+        public: true # because event subscribers are lazy-loaded
+        arguments:
+            - "@security.token_storage"
+            - "" # provider
+            - "" # userChecker
+            - "" # providerKey
+            - "@security.access.decision_manager"
+            - "@?logger"
+            - "" # _switch_user
+            - "" # ROLE_ALLOWED_TO_SWITCH
+            - "@?event_dispatcher"
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+#            - { name: kernel.event_listener, event: security.switch_user }
+
+    kuleuven_authentication.security.switch_user_persistence_subscriber:
+        class: "%kuleuven_authentication.security.switch_user_persistence_subscriber.class%"
+        arguments:
+            - "@session"
+            - "@security.token_storage"
+            - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@security.authentication.manager"
+            - ""
+        calls:
+            - [setLogger, ["@?logger"]]
+        tags:
+            - { name: monolog.logger, channel: security }
+            - { name: kernel.event_subscriber }

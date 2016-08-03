@@ -1,0 +1,46 @@
+<div class="metrics">
+    <div class="metric">
+        <span class="value">
+            {% if attribute(shibboleth.attributes, shibboleth.usernameAttribute) %}
+                {{ attribute(shibboleth.attributes, shibboleth.usernameAttribute) }}
+            {% else %}
+                {{ attribute(shibboleth.attributes, shibboleth.usernameAttribute)|json_encode }}
+            {% endif %}
+        </span>
+        <span class="label">Username<br/><small>{{ shibboleth.usernameAttribute }}</small></span>
+    </div>
+
+    <div class="metric">
+        <span class="value">{{ include('KuleuvenAuthenticationBundle:Icon:' ~ (attribute(shibboleth.attributes, shibboleth.authenticatedAttribute) ? 'yes' : 'no') ~ '.svg.twig') }}</span>
+        <span class="label">Authenticated<br/><small>{{ shibboleth.authenticatedAttribute }}</small></span>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th scope="col" class="key">Attribute</th>
+        <th scope="col">Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for key, value in shibboleth.attributes %}
+        <tr {% if value is same as(null) %}class="status-warning"{% endif %}>
+            <th {% if value is same as(null) %}class="status-warning"{% endif %}>
+                {% if key starts with 'Shib-' %}
+                    <nobr><span style="opacity: 0.4;">Shib-</span>{{ key|replace({'Shib-':''}) }}</nobr>
+                {% else %}
+                    <nobr>{{ key }}</nobr>
+                {% endif %}
+            </th>
+            <td>
+                {% if value is same as(null) or value is same as(false) or value is same as(true) or value is iterable %}
+                    {{ value|json_encode }}
+                {% else %}
+                    {{ value }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

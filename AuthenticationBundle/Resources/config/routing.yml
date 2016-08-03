@@ -1,0 +1,7 @@
+kuleuven_authentication_root:
+    path:       /authentication
+    defaults:   { _controller: kuleuven_authentication.controller.default:indexAction }
+
+kuleuven_authentication_logout:
+    path:       /logout
+    defaults:   { _controller: kuleuven_authentication.controller.security:logoutAction }
