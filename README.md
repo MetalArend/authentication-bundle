@@ -347,8 +347,8 @@ security:
         kuleuven_authentication:
             ...
             kuleuven_authentication:
+                provider: chain_provider
                 default_roles: [ROLE_SHIBBOLETH_AUTHENTICATED]
-            provider: chain_provider
             switch_user: { role: ROLE_SHIBBOLETH_AUTHENTICATED, parameter: _switch_user }
 ```
 
