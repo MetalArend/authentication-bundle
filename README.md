@@ -374,8 +374,7 @@ Upcoming
 - TODO Implement LoggerAware in some extra classes
 - TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
 - TODO Implement ldap.jquery.js
-- TODO Create package for packagist
-- TODO Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
+- TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
     - For KU Leuven: To request a commercial certificate, please refer to: https://certificates.kuleuven.be
     - SSL certificates: Download the certificate from http://shib.kuleuven.be/download/metadata/metadata.associatie.kuleuven.be.crt
     - Metadata provider: https://shib.kuleuven.be/download/metadata/metadata-kuleuven.xml
