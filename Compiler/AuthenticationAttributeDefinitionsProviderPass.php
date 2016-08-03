@@ -13,9 +13,9 @@ class AuthenticationAttributeDefinitionsProviderPass implements CompilerPassInte
 
     protected $multivalues;
 
-    public function __construct($xmlFile = '')
+    public function __construct()
     {
-        $this->xmlFile = (null !== $xmlFile ? $xmlFile : __DIR__ . '/../Resources/config/attribute-map/attribute-map.xml');
+        $this->xmlFile = __DIR__ . '/../Resources/config/attribute-map/attribute-map.xml';
 
         // Add default Shibboleth definitions
         // https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAttributeAccess

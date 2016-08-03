@@ -104,7 +104,10 @@ class LdapService
         // Retrieve from the session (cache)
         $hash = 'shibboleth-development' . '-' . md5(serialize($filter) . '-' . serialize($attributes) . '-' . $limit . '-' . $fuzzy);
         if (!empty($this->session) && $this->session->has($hash)) {
-            return $this->session->get($hash);
+            $results = $this->session->get($hash);
+            if (!empty($results) && 0 !== $results['count']) {
+                return $results;
+            }
         }
 
         // Bind
@@ -132,12 +135,12 @@ class LdapService
                 throw new \Exception('Could not search LDAP: ' . $this->error());
             }
             $results = \ldap_get_entries($this->handle, $search);
-        }
 
-        // Save to the session (cache)
-        if (!empty($this->session)) {
-            // Save to the cache
-            $this->session->set($hash, $results);
+            // Save to the session (cache)
+            if (!empty($this->session) && 0 !== $results['count']) {
+                // Save to the cache
+                $this->session->set($hash, $results);
+            }
         }
 
         // Return
@@ -146,11 +149,15 @@ class LdapService
 
     public function errno()
     {
+        $this->bind();
+
         return \ldap_errno($this->handle);
     }
 
     public function error()
     {
+        $this->bind();
+
         if (\ldap_get_option($this->handle, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error)) {
             return $extended_error;
         }

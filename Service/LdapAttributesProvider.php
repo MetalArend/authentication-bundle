@@ -27,7 +27,7 @@ class LdapAttributesProvider implements AttributesInjectionProviderInterface, At
     public function __construct(LdapService $ldapService, $ldapFilter = [], array $attributeDefinitions)
     {
         $this->ldapService = $ldapService;
-        $this->ldapFilter = $ldapFilter;
+        $this->ldapFilter = (!empty($ldapFilter) ? $ldapFilter : []);
         $this->attributeDefinitions = $attributeDefinitions;
     }
 
@@ -40,6 +40,10 @@ class LdapAttributesProvider implements AttributesInjectionProviderInterface, At
      */
     protected function getAttributesByFilter(array $filter, array $attributes = [], $limit = 1)
     {
+        if (empty($filter)) {
+            return [];
+        }
+
         $ldapResults = $this->ldapService->search($filter, $attributes, $limit, false);
         if (0 === $ldapResults['count']) {
             return [];
