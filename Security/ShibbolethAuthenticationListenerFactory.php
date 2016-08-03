@@ -27,7 +27,7 @@ class ShibbolethAuthenticationListenerFactory implements SecurityFactoryInterfac
         $node
             ->children()
             ->scalarNode('provider')->defaultValue('kuleuven_authentication.service.shibboleth_user_provider')->end()
-            ->arrayNode('default_roles')->prototype('scalar')->end()->defaultValue(['ROLE_SHIBBOLETH_AUTHENTICATED'])->end()
+            ->arrayNode('default_roles')->prototype('scalar')->end()->defaultValue([])->end()
             ->end();
     }
 
