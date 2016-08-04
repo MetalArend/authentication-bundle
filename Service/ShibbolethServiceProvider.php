@@ -13,6 +13,11 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $requestStack;
 
     /**
+     * @var ShibbolethAttributesProvider
+     */
+    protected $shibbolethAttributesProvider;
+
+    /**
      * @var bool
      */
     protected $securedHandler;
@@ -63,11 +68,6 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $defaultCharset;
 
     /**
-     * @var array
-     */
-    protected $attributeDefinitions;
-
-    /**
      * @var Request
      */
     protected $request;
@@ -78,22 +78,22 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $attributesCache;
 
     /**
-     * @param RequestStack $requestStack
-     * @param bool         $securedHandler
-     * @param string       $handlerPath
-     * @param string       $statusPath
-     * @param string       $sessionLoginPath
-     * @param string       $sessionLogoutPath
-     * @param string       $sessionOverviewPath
-     * @param string       $usernameAttribute
-     * @param string       $authenticatedAttribute
-     * @param string       $logoutUrlAttribute
-     * @param string       $defaultCharset
-     * @param array        $attributeDefinitions
-     * @internal param ShibbolethAttributesProvider $shibbolethAttributesProvider
+     * @param RequestStack                 $requestStack
+     * @param ShibbolethAttributesProvider $shibbolethAttributesProvider
+     * @param bool                         $securedHandler
+     * @param string                       $handlerPath
+     * @param string                       $statusPath
+     * @param string                       $sessionLoginPath
+     * @param string                       $sessionLogoutPath
+     * @param string                       $sessionOverviewPath
+     * @param string                       $usernameAttribute
+     * @param string                       $authenticatedAttribute
+     * @param string                       $logoutUrlAttribute
+     * @param string                       $defaultCharset
      */
     public function __construct(
         RequestStack $requestStack,
+        ShibbolethAttributesProvider $shibbolethAttributesProvider,
         $securedHandler,
         $handlerPath,
         $statusPath,
@@ -103,11 +103,11 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $usernameAttribute,
         $authenticatedAttribute,
         $logoutUrlAttribute,
-        $defaultCharset,
-        $attributeDefinitions
+        $defaultCharset
     )
     {
         $this->requestStack = $requestStack;
+        $this->shibbolethAttributesProvider = $shibbolethAttributesProvider;
         $this->securedHandler = $securedHandler;
         $this->handlerPath = $handlerPath;
         $this->statusPath = $statusPath;
@@ -118,7 +118,6 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $this->authenticatedAttribute = $authenticatedAttribute;
         $this->logoutUrlAttribute = $logoutUrlAttribute;
         $this->defaultCharset = $defaultCharset;
-        $this->attributeDefinitions = $attributeDefinitions;
 
         return $this;
     }
@@ -184,74 +183,24 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     }
 
     /**
-     * @param null|mixed    $fallback
-     * @param null|callable $callback
      * @return array
      */
-    public function getAttributes($fallback = null, $callback = null)
+    public function getAttributes()
     {
-        if (empty($this->attributesCache)) {
-            $attributes = [];
-            foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
-                $value = $this->getAttribute($idOrAlias, $fallback, $callback);
-                $attributes[$idOrAlias] = $value;
-            }
-            $this->attributesCache = $attributes;
-        }
-
-        return $this->attributesCache;
+        return $this->shibbolethAttributesProvider->getAttributes();
     }
 
     /**
-     * @param string        $name
-     * @param null|string   $fallback
-     * @param null|callable $callback - tip: use the string 'reset' as $callback parameter to get a single result from a multivalue
+     * @param string $name
      * @return null|string
      */
-    public function getAttribute($name, $fallback = null, $callback = null)
+    public function getAttribute($name)
     {
-        $request = $this->getRequest();
-        $names = [];
-        if (false === strpos($name, 'Shib-') && false === strpos($name, 'Shib_')) {
-            $names[] = 'Shib-' . str_replace('_', '-', $name);
-            $names[] = 'Shib_' . str_replace('-', '_', $name);
+        $attributes = $this->shibbolethAttributesProvider->getAttributes();
+        if (!isset($attributes[$name])) {
+            return null;
         }
-        $names[] = str_replace('_', '-', $name);
-        $names[] = str_replace('-', '_', $name);
-
-        foreach ($names as $name) {
-            if (isset($this->attributeDefinitions[$name])) {
-                $attributeDefinition = $this->attributeDefinitions[$name];
-                $value = null;
-                $found = false;
-                if ($request->server->has($attributeDefinition['id'])) {
-                    $value = $request->server->get($attributeDefinition['id']);
-                    $found = true;
-                } else {
-                    foreach ($attributeDefinition['aliases'] as $alias) {
-                        if ($request->server->has($alias)) {
-                            $value = $request->server->get($alias);
-                            $found = true;
-                        }
-                    }
-                }
-                if (!$found) {
-                    continue;
-                }
-                $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : $this->getDefaultCharset();
-                if ($charset == 'UTF-8') {
-                    $value = utf8_decode($value);
-                }
-                if (isset($attributeDefinition['multivalue']) && $attributeDefinition['multivalue']) {
-                    $value = explode(';', $value); // $value is an array
-                }
-                if (!empty($callback) && is_callable($callback)) {
-                    $value = $callback($value);
-                }
-                return $value;
-            }
-        }
-        return $fallback;
+        return $attributes[$name];
     }
 
 

@@ -17,11 +17,18 @@ class ShibbolethUserProvider implements UserProviderInterface
     protected $shibbolethServiceProvider;
 
     /**
-     * @param ShibbolethServiceProvider $shibbolethServiceProvider
+     * @var array
      */
-    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider)
+    protected $attributeDefinitions;
+
+    /**
+     * @param ShibbolethServiceProvider $shibbolethServiceProvider
+     * @param array                     $attributeDefinitions
+     */
+    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, array $attributeDefinitions)
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
+        $this->attributeDefinitions = $attributeDefinitions;
     }
 
     /**
@@ -36,9 +43,24 @@ class ShibbolethUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('User %s is not authenticated by Shibboleth.', $username));
         }
 
+        $attributes = $this->shibbolethServiceProvider->getAttributes();
+        foreach ($attributes as $name => &$value) {
+            if (!isset($this->attributeDefinitions[$name])) {
+                continue;
+            }
+            $attributeDefinition = $this->attributeDefinitions[$name];
+            $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : 'UTF-8';
+            if ($charset == 'UTF-8') {
+                $value = utf8_decode($value);
+            }
+            if (isset($attributeDefinition['multivalue']) && $attributeDefinition['multivalue']) {
+                $value = explode(';', $value); // $value is an array
+            }
+        }
+
         return new KuleuvenUser(
-            $this->shibbolethServiceProvider->getUsername(),
-            $this->shibbolethServiceProvider->getAttributes()
+            $username,
+            $attributes
         );
     }
 

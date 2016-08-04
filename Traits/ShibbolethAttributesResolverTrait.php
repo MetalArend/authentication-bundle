@@ -52,7 +52,7 @@ trait ShibbolethAttributesResolverTrait
         if (!array_key_exists($name, $this->attributes)) {
             return null;
         }
-
+        
         return $this->attributes[$name];
     }
 

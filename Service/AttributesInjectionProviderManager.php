@@ -57,7 +57,7 @@ class AttributesInjectionProviderManager
                 $injector = $injectorData['injector'];
                 $attributes = $injector->getInjectionAttributes();
                 foreach ($attributes as $idOrAlias => $value) {
-                    $server->set($idOrAlias, $value);
+                    $server->set($idOrAlias, (string)$value);
                 }
             }
         }

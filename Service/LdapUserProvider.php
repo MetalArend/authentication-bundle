@@ -17,11 +17,18 @@ class LdapUserProvider implements UserProviderInterface
     protected $ldapAttributesProvider;
 
     /**
-     * @param LdapAttributesProvider $ldapAttributesProvider
+     * @var array
      */
-    public function __construct(LdapAttributesProvider $ldapAttributesProvider)
+    protected $attributeDefinitions;
+
+    /**
+     * @param LdapAttributesProvider $ldapAttributesProvider
+     * @param array                  $attributeDefinitions
+     */
+    public function __construct(LdapAttributesProvider $ldapAttributesProvider, array $attributeDefinitions)
     {
         $this->ldapAttributesProvider = $ldapAttributesProvider;
+        $this->attributeDefinitions = $attributeDefinitions;
     }
 
     /**
@@ -34,8 +41,22 @@ class LdapUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('Username %s not found', $username));
         }
 
+        foreach ($attributes as $name => &$value) {
+            if (!isset($this->attributeDefinitions[$name])) {
+                continue;
+            }
+            $attributeDefinition = $this->attributeDefinitions[$name];
+            $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : 'UTF-8';
+            if ($charset == 'UTF-8') {
+                $value = utf8_decode($value);
+            }
+            if (isset($attributeDefinition['multivalue']) && $attributeDefinition['multivalue']) {
+                $value = explode(';', $value); // $value is an array
+            }
+        }
+
         return new KuleuvenUser(
-            $attributes['uid'],
+            $username,
             $attributes
         );
     }
