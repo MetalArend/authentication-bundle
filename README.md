@@ -91,7 +91,7 @@ Setup Shibboleth in the .htaccess file in your public folder
 <IfModule mod_shib>
     AuthType shibboleth
     Require shibboleth
-    ShibRequireSession Off
+    ShibRequireSession On
 </IfModule>
 ```
 
