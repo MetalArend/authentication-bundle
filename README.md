@@ -99,8 +99,9 @@ Change Shibboleth Service Provider settings (optional)
 ------------------------------------------------------
 
 ```yml
-# app/config/parameters.yml
-parameters:
+# app/config/config.yml
+...
+kuleuven_authentication:
     shibboleth_is_secured_handler: true
     shibboleth_handler_path: /Shibboleth.sso
     shibboleth_status_path: /Status
@@ -130,25 +131,40 @@ This bundle however lets you overwrite any attribute from within your parameters
 through the '\Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider' service that uses
 the 'authentication_attribute_overwrites' parameter to inject an array of server attributes.
 
+By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your ldap filter.
+
+```yml
+# app/config/config_dev.yml
+kuleuven_authentication:
+    ...
+    authentication_attribute_overwrites_enabled: true
+```
+
+Now you can add your overwrites to your parameters.yml.
+
 ```yml
 # app/config/parameters.yml
 parameters:
+    ...
     authentication_attribute_overwrites:
         Shib-Identity-Provider: 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'
         Shib-Person-uid: '<(string)your-uid>'
 ```
 
 If you want to add other services to populate your server attributes,
-they should implement '\Kuleuven\AuthenticationBundle\Service\AttributesProviderInterface',
+they should implement '\Kuleuven\AuthenticationBundle\Service\AttributesInjectionProviderInterface',
 and should be tagged with 'kuleuven_authentication.shibboleth_attributes_injector'.
 
 ```yml
 # app/config/services.yml
+    ...
     my_attributes_provider:
         class: "%my_attributes_provider.class%"
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 ```
+
+An example of such an injection is the built-in LDAP attribute provider, explained further on in this document.
 
 Notice that the authentication_attribute_overwrites parameter will always overwrite any other server attributes,
 unless you would overwrite the priority of the corresponding service. By default the priority is set on -INF.
@@ -307,13 +323,15 @@ You can use LDAP to provide Shibboleth server attributes,
 through the '\Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider' service that uses
 the 'authentication_attribute_ldap_filter' parameter to inject an LDAP result array of server attributes.
 
+By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your ldap filter.
 Make sure the filter is unique enough to only provide one user.
 
 ```yml
 # app/config/parameters.yml
 parameters:
-    authentication_attribute_ldap_filter:
-        uid: '<(string)your-uid>'
+    ...
+    authentication_attribute_ldap_enabled: true
+    authentication_attribute_ldap_filter: {uid: '<(string)your-uid>'}
 ```
 
 Impersonate users (optional)
@@ -352,6 +370,31 @@ security:
             switch_user: { role: ROLE_SHIBBOLETH_AUTHENTICATED, parameter: _switch_user }
 ```
 
+Typical development setup
+=========================
+
+Both using the overwrites and LDAP, there is a very easy setup to enable local development without installing Shibboleth.
+
+Enable the overwrites and provide the overwrite for the Shib-Identity-Provider attribute in config_dev.yml.
+
+```yml
+# app/config/config_dev.yml
+...
+kuleuven_authentication:
+    authentication_attribute_overwrites_enabled: true
+    authentication_attribute_overwrites: {Shib-Identity-Provider: 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'}
+```
+
+Enable the ldap_filter and add your uid by adding this to your parameters.yml(.dist).
+
+```yml
+# app/config/parameters.yml.dist
+...
+parameters:
+    authentication_attribute_ldap_enabled: true
+    authentication_attribute_ldap_filter: {uid: '<(string)your-uid>'}
+```
+
 Extra
 =====
 
@@ -365,6 +408,7 @@ Upcoming
 - TODO Update documentation
 - TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
 - TODO Check if the Shib-Handler attribute is present, and give notice if it is different than the configuration
+- TODO Add the expected identity-provider value, and check for it on production (and use it locally as an overwrite?)
 - TODO Send notice if LDAP filter returns more than 1 user
 - TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
 - TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AuthenticationAttributeDefinitionsProviderPass

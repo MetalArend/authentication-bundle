@@ -2,7 +2,7 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-class ParameterAttributesProvider implements AttributesProviderInterface
+class ParameterAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
 {
     /**
      * @var array
@@ -10,11 +10,26 @@ class ParameterAttributesProvider implements AttributesProviderInterface
     protected $overwrites;
 
     /**
-     * @param array $overwrites
+     * @var bool
      */
-    public function __construct($overwrites = [])
+    protected $enabled;
+
+    /**
+     * @param array $overwrites
+     * @param bool  $enabled
+     */
+    public function __construct($overwrites = [], $enabled = false)
     {
         $this->overwrites = $overwrites;
+        $this->enabled = $enabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return $this->enabled;
     }
 
     /**
