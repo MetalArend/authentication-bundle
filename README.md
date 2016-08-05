@@ -139,15 +139,15 @@ parameters:
 ```
 
 If you want to add other services to populate your server attributes,
-they should implement '\Kuleuven\AuthenticationBundle\Service\AttributesInjectionProviderInterface',
-and should be tagged with 'kuleuven_authentication.attributes_injector'.
+they should implement '\Kuleuven\AuthenticationBundle\Service\AttributesProviderInterface',
+and should be tagged with 'kuleuven_authentication.shibboleth_attributes_injector'.
 
 ```yml
 # app/config/services.yml
     my_attributes_provider:
         class: "%my_attributes_provider.class%"
         tags:
-            - { name: kuleuven_authentication.attributes_injector }
+            - { name: kuleuven_authentication.shibboleth_attributes_injector }
 ```
 
 Notice that the authentication_attribute_overwrites parameter will always overwrite any other server attributes,
@@ -369,7 +369,7 @@ Upcoming
 - TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
 - TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AuthenticationAttributeDefinitionsProviderPass
 - TODO Make it possible to extend vs overwrite the attribute definitions (extra parameter?)
-- TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesInjectionProviderInterface
+- TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesProviderInterface
 - TODO Add providerKey in token support checks
 - TODO Implement LoggerAware in some extra classes
 - TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector

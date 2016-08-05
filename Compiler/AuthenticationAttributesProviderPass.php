@@ -10,13 +10,13 @@ class AuthenticationAttributesProviderPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('kuleuven_authentication.service.attributes_injector_manager')) {
+        if (!$container->has('kuleuven_authentication.service.shibboleth_attributes_injector_manager')) {
             return;
         }
 
-        $definition = $container->findDefinition('kuleuven_authentication.service.attributes_injector_manager');
+        $definition = $container->findDefinition('kuleuven_authentication.service.shibboleth_attributes_injector_manager');
 
-        $taggedServices = $container->findTaggedServiceIds('kuleuven_authentication.attributes_injector');
+        $taggedServices = $container->findTaggedServiceIds('kuleuven_authentication.shibboleth_attributes_injector');
 
         foreach ($taggedServices as $id => $tags) {
             foreach ($tags as $attributes) {

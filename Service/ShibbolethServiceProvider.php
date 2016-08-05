@@ -13,11 +13,6 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $requestStack;
 
     /**
-     * @var ShibbolethAttributesProvider
-     */
-    protected $shibbolethAttributesProvider;
-
-    /**
      * @var bool
      */
     protected $securedHandler;
@@ -68,18 +63,17 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $defaultCharset;
 
     /**
+     * @var array
+     */
+    protected $attributeDefinitions;
+
+    /**
      * @var Request
      */
     protected $request;
 
     /**
-     * @var array
-     */
-    protected $attributesCache;
-
-    /**
      * @param RequestStack                 $requestStack
-     * @param ShibbolethAttributesProvider $shibbolethAttributesProvider
      * @param bool                         $securedHandler
      * @param string                       $handlerPath
      * @param string                       $statusPath
@@ -90,10 +84,10 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
      * @param string                       $authenticatedAttribute
      * @param string                       $logoutUrlAttribute
      * @param string                       $defaultCharset
+     * @param                              $attributeDefinitions
      */
     public function __construct(
         RequestStack $requestStack,
-        ShibbolethAttributesProvider $shibbolethAttributesProvider,
         $securedHandler,
         $handlerPath,
         $statusPath,
@@ -103,11 +97,11 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $usernameAttribute,
         $authenticatedAttribute,
         $logoutUrlAttribute,
-        $defaultCharset
+        $defaultCharset,
+        $attributeDefinitions
     )
     {
         $this->requestStack = $requestStack;
-        $this->shibbolethAttributesProvider = $shibbolethAttributesProvider;
         $this->securedHandler = $securedHandler;
         $this->handlerPath = $handlerPath;
         $this->statusPath = $statusPath;
@@ -118,6 +112,7 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $this->authenticatedAttribute = $authenticatedAttribute;
         $this->logoutUrlAttribute = $logoutUrlAttribute;
         $this->defaultCharset = $defaultCharset;
+        $this->attributeDefinitions = $attributeDefinitions;
 
         return $this;
     }
@@ -183,26 +178,28 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     }
 
     /**
+     * @param null $fallback
      * @return array
      */
-    public function getAttributes()
+    public function getAttributes($fallback = null)
     {
-        return $this->shibbolethAttributesProvider->getAttributes();
+        $attributes = [];
+        foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
+            $attributes[$idOrAlias] = $this->getAttribute($idOrAlias, $fallback);
+        }
+        return $attributes;
     }
 
     /**
      * @param string $name
+     * @param null   $fallback
      * @return null|string
      */
-    public function getAttribute($name)
+    public function getAttribute($name, $fallback = null)
     {
-        $attributes = $this->shibbolethAttributesProvider->getAttributes();
-        if (!isset($attributes[$name])) {
-            return null;
-        }
-        return $attributes[$name];
+        $request = $this->requestStack->getCurrentRequest();
+        return $request->server->get($name, $fallback);
     }
-
 
     /**
      * @return bool
