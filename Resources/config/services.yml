@@ -4,7 +4,6 @@ parameters:
 
     kuleuven_authentication.controller.default.class: 'Kuleuven\AuthenticationBundle\Controller\DefaultController'
     kuleuven_authentication.controller.security.class: 'Kuleuven\AuthenticationBundle\Controller\SecurityController'
-    kuleuven_authentication.service.attributes_injector_manager.class: 'Kuleuven\AuthenticationBundle\Service\AttributesInjectionProviderManager'
     kuleuven_authentication.service.parameter_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider'
     kuleuven_authentication.service.firewall_helper.class: 'Kuleuven\AuthenticationBundle\Service\FirewallHelper'
     twig.extension.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Twig\ShibbolethExtension'
@@ -12,7 +11,7 @@ parameters:
 
     # Shibboleth
 
-    kuleuven_authentication.service.shibboleth_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethAttributesProvider'
+    kuleuven_authentication.service.shibboleth_attributes_injector_manager.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethAttributesInjectionProviderManager'
     kuleuven_authentication.service.shibboleth_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider'
     kuleuven_authentication.service.shibboleth_service_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider'
     kuleuven_authentication.security.authentication.entry_point.class: 'Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationEntryPoint'
@@ -50,18 +49,12 @@ services:
     kuleuven_authentication.controller.security:
         class: "%kuleuven_authentication.controller.security.class%"
 
-    kuleuven_authentication.service.attributes_injector_manager:
-        class: "%kuleuven_authentication.service.attributes_injector_manager.class%"
-        tags:
-            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 255 }
-
     kuleuven_authentication.service.parameter_attributes_provider:
         class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
         arguments:
             - "%authentication_attribute_overwrites%"
-            - "%authentication_attribute_definitions%"
         tags:
-            - { name: kuleuven_authentication.attributes_injector }
+            - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
     kuleuven_authentication.service.firewall_helper:
         class: "%kuleuven_authentication.service.firewall_helper.class%"
@@ -93,11 +86,12 @@ services:
 
     # Shibboleth
 
-    kuleuven_authentication.service.shibboleth_attributes_provider:
-        class: "%kuleuven_authentication.service.shibboleth_attributes_provider.class%"
+    kuleuven_authentication.service.shibboleth_attributes_injector_manager:
+        class: "%kuleuven_authentication.service.shibboleth_attributes_injector_manager.class%"
         arguments:
-            - "@request_stack"
             - "%authentication_attribute_definitions%"
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 255 }
 
     kuleuven_authentication.service.shibboleth_user_provider:
         class: "%kuleuven_authentication.service.shibboleth_user_provider.class%"
@@ -109,7 +103,6 @@ services:
         class: "%kuleuven_authentication.service.shibboleth_service_provider.class%"
         arguments:
             - "@request_stack"
-            - "@kuleuven_authentication.service.shibboleth_attributes_provider"
             - "%shibboleth_is_secured_handler%"
             - "%shibboleth_handler_path%"
             - "%shibboleth_status_path%"
@@ -120,6 +113,7 @@ services:
             - "%shibboleth_authenticated_attribute%"
             - "%shibboleth_logout_url_attribute%"
             - "%shibboleth_default_charset%"
+            - "%authentication_attribute_definitions%"
 
     kuleuven_authentication.security.authentication.entry_point:
         class: "%kuleuven_authentication.security.authentication.entry_point.class%"
@@ -192,9 +186,8 @@ services:
         arguments:
             - "@kuleuven_authentication.service.ldap"
             - "%authentication_attribute_ldap_filter%"
-            - "%authentication_attribute_definitions%"
         tags:
-            - { name: kuleuven_authentication.attributes_injector }
+            - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
     kuleuven_authentication.service.ldap_user_provider:
         class: "%kuleuven_authentication.service.ldap_user_provider.class%"

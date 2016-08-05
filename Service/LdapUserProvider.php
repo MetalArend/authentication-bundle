@@ -36,22 +36,36 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        $attributes = $this->ldapAttributesProvider->getAttributesByUid($username);
-        if (empty($attributes)) {
+        $ldapAttributes = $this->ldapAttributesProvider->getAttributesByFilter(['uid' => $username]);
+        if (empty($ldapAttributes)) {
             throw new UsernameNotFoundException(sprintf('Username %s not found', $username));
         }
 
-        foreach ($attributes as $name => &$value) {
-            if (!isset($this->attributeDefinitions[$name])) {
-                continue;
+        $attributes = [];
+        foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
+            $value = null;
+            switch (true) {
+                case isset($ldapAttributes[$idOrAlias]):
+                    $value = $ldapAttributes[$idOrAlias];
+                    break;
+                case isset($ldapAttributes[strtolower($idOrAlias)]):
+                    $value = $ldapAttributes[strtolower($idOrAlias)];
+                    break;
+                default:
+                    continue 2; // switch is considered a looping structure, we have to continue the foreach
             }
-            $attributeDefinition = $this->attributeDefinitions[$name];
             $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : 'UTF-8';
             if ($charset == 'UTF-8') {
                 $value = utf8_decode($value);
             }
             if (isset($attributeDefinition['multivalue']) && $attributeDefinition['multivalue']) {
                 $value = explode(';', $value); // $value is an array
+            }
+            $id = $attributeDefinition['id'];
+            $aliases = $attributeDefinition['aliases'];
+            $attributes[$id] = $value;
+            foreach ($aliases as $alias) {
+                $attributes[$alias] = $value;
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-class LdapAttributesProvider implements AttributesInjectionProviderInterface, AttributesProviderInterface
+class LdapAttributesProvider implements AttributesProviderInterface
 {
     /**
      * @var LdapService
@@ -15,20 +15,13 @@ class LdapAttributesProvider implements AttributesInjectionProviderInterface, At
     protected $ldapFilter;
 
     /**
-     * @var array
-     */
-    protected $attributeDefinitions;
-
-    /**
      * @param LdapService $ldapService
      * @param array       $ldapFilter
-     * @param array       $attributeDefinitions
      */
-    public function __construct(LdapService $ldapService, $ldapFilter = [], array $attributeDefinitions)
+    public function __construct(LdapService $ldapService, $ldapFilter = [])
     {
         $this->ldapService = $ldapService;
         $this->ldapFilter = (!empty($ldapFilter) ? $ldapFilter : []);
-        $this->attributeDefinitions = $attributeDefinitions;
     }
 
     /**
@@ -38,7 +31,7 @@ class LdapAttributesProvider implements AttributesInjectionProviderInterface, At
      * @return array
      * @throws \Exception
      */
-    protected function getAttributesByFilter(array $filter, array $attributes = [], $limit = 1)
+    public function getAttributesByFilter(array $filter, array $attributes = [], $limit = 1)
     {
         if (empty($filter)) {
             return [];
@@ -51,59 +44,31 @@ class LdapAttributesProvider implements AttributesInjectionProviderInterface, At
 
         $ldapResult = $ldapResults['0'];
 
-        $normalizedResult = [];
+        $attributes = [];
         for ($i = 0; $i < $ldapResult['count']; $i++) {
             $name = $ldapResult[$i];
-            $normalizedResult[$name] = $ldapResult[$name];
-        }
-
-        $attributes = [];
-        foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
-            $name = strtolower($idOrAlias);
-            if (!isset($normalizedResult[$name])) {
-                continue;
-            }
-            $value = null;
-            if (!$attributeDefinition['multivalue']) {
-                $value = $normalizedResult[$name][0];
+            if (1 === $ldapResult[$name]['count']) {
+                $value = $ldapResult[$name][0];
             } else {
                 $value = [];
-                for ($j = 0; $j < $normalizedResult[$name]['count']; $j++) {
-                    $value[] = $normalizedResult[$name][$j];
+                for ($j = 0; $j < $ldapResult[$name]['count']; $j++) {
+                    $value[] = $ldapResult[$name][$j];
                 }
                 $value = implode(';', $value);
             }
-            $attributes[$attributeDefinition['id']] = $value;
-            foreach ($attributeDefinition['aliases'] as $alias) {
-                $attributes[$alias] = $value;
-            }
+            $attributes[$name] = $value;
         }
 
         return $attributes;
     }
 
     /**
+     * @param array $attributes
+     * @param int   $limit
      * @return array
      */
-    public function getAttributes()
+    public function getAttributes(array $attributes = [], $limit = 1)
     {
-        return $this->getAttributesByFilter($this->ldapFilter);
-    }
-
-    /**
-     * @return array
-     */
-    public function getInjectionAttributes()
-    {
-        return $this->getAttributes();
-    }
-
-    /**
-     * @param $uid
-     * @return array
-     */
-    public function getAttributesByUid($uid)
-    {
-        return $this->getAttributesByFilter(['uid' => $uid]);
+        return $this->getAttributesByFilter($this->ldapFilter, $attributes, $limit);
     }
 }
