@@ -72,14 +72,15 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
     public function handle(GetResponseEvent $event)
     {
         $request = $event->getRequest();
-        $this->log(
-            basename(__FILE__) .
-            ' - ' .
-            sprintf(
-                'Shibboleth attributes found: %s',
-                json_encode($this->shibbolethServiceProvider->getAttributes())
-            )
-        );
+
+        $attributes = $this->shibbolethServiceProvider->getAttributes();
+
+        if (empty($attributes)) {
+            $this->log(basename(__FILE__) . ' - ' . 'Shibboleth attributes not found');
+            return;
+        }
+
+        $this->log(basename(__FILE__) . ' - ' . sprintf('Shibboleth attributes found: %s', json_encode($attributes)));
 
         if (!$this->shibbolethServiceProvider->isAuthenticated()) {
             $this->log(basename(__FILE__) . ' - ' . 'Authentication key not found');
@@ -87,6 +88,12 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
         }
 
         $username = $this->shibbolethServiceProvider->getUsername();
+
+        if (empty($username)) {
+            $this->log(basename(__FILE__) . ' - ' . 'Username not found');
+            return;
+        }
+
         $this->log(basename(__FILE__) . ' - ' . sprintf('Username found: %s', $username));
         $token = $this->tokenStorage->getToken();
 
@@ -112,8 +119,8 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
 
         try {
             $token = new KuleuvenUserToken(
-                $this->shibbolethServiceProvider->getUsername(),
-                $this->shibbolethServiceProvider->getAttributes(),
+                $username,
+                $attributes,
                 $this->defaultRoles
             );
             $this->log(basename(__FILE__) . ' - ' . sprintf('Token created for username "%s": %s', $username, $token));

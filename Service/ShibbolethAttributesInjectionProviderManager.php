@@ -65,7 +65,6 @@ class ShibbolethAttributesInjectionProviderManager
             foreach ($providerPropertiesCollectionIterator as $providerProperties) {
                 /** @var AttributesInjectionProviderInterface $provider */
                 $provider = $providerProperties['provider'];
-                dump(get_class($provider), $provider->getAttributes());
                 if (!$provider->isEnabled()) {
                     continue;
                 }
