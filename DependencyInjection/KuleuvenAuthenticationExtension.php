@@ -27,9 +27,6 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
-
         $this->addClassesToCompile([
             ShibbolethAuthenticationListenerFactory::class,
             ShibbolethAuthenticationEntryPoint::class,
@@ -43,8 +40,8 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
             KuleuvenUser::class,
         ]);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.yml');
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
 
         // Attribute definitions
         // Default values will be provided by AuthenticationAttributeDefinitionsProviderPass
@@ -54,11 +51,13 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
             $container->setParameter('authentication_attribute_definitions', []);
         }
         // Injectors are provided by AuthenticationAttributesProviderPass
+        $container->setParameter('authentication_attribute_overwrites_enabled', $config['authentication_attribute_overwrites_enabled']);
         if (isset($config['authentication_attribute_overwrites'])) {
             $container->setParameter('authentication_attribute_overwrites', $config['authentication_attribute_overwrites']);
         } elseif (!$container->hasParameter('authentication_attribute_overwrites')) {
             $container->setParameter('authentication_attribute_overwrites', []);
         }
+        $container->setParameter('authentication_attribute_ldap_enabled', $config['authentication_attribute_ldap_enabled']);
         $container->setParameter('authentication_attribute_ldap_filter', $config['authentication_attribute_ldap_filter']);
 
         // Shibboleth
@@ -89,6 +88,9 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
 
         // Person Data API
         $container->setParameter('person_data_api_url', $config['person_data_api_url']);
+
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.yml');
 
     }
 }

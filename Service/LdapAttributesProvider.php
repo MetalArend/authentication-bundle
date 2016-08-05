@@ -2,7 +2,7 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-class LdapAttributesProvider implements AttributesProviderInterface
+class LdapAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
 {
     /**
      * @var LdapService
@@ -12,16 +12,31 @@ class LdapAttributesProvider implements AttributesProviderInterface
     /**
      * @var array
      */
-    protected $ldapFilter;
+    protected $filter;
+
+    /**
+     * @var bool
+     */
+    protected $enabled;
 
     /**
      * @param LdapService $ldapService
-     * @param array       $ldapFilter
+     * @param array       $filter
+     * @param bool        $enabled
      */
-    public function __construct(LdapService $ldapService, $ldapFilter = [])
+    public function __construct(LdapService $ldapService, $filter = [], $enabled = false)
     {
         $this->ldapService = $ldapService;
-        $this->ldapFilter = (!empty($ldapFilter) ? $ldapFilter : []);
+        $this->filter = (!empty($filter) ? $filter : []);
+        $this->enabled = $enabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return $this->enabled;
     }
 
     /**
@@ -69,6 +84,6 @@ class LdapAttributesProvider implements AttributesProviderInterface
      */
     public function getAttributes(array $attributes = [], $limit = 1)
     {
-        return $this->getAttributesByFilter($this->ldapFilter, $attributes, $limit);
+        return $this->getAttributesByFilter($this->filter, $attributes, $limit);
     }
 }

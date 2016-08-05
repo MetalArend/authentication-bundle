@@ -53,6 +53,7 @@ services:
         class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
         arguments:
             - "%authentication_attribute_overwrites%"
+            - "%authentication_attribute_overwrites_enabled%"
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
@@ -186,6 +187,7 @@ services:
         arguments:
             - "@kuleuven_authentication.service.ldap"
             - "%authentication_attribute_ldap_filter%"
+            - "%authentication_attribute_ldap_enabled%"
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 

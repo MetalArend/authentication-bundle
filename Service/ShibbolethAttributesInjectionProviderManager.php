@@ -28,10 +28,10 @@ class ShibbolethAttributesInjectionProviderManager
     }
 
     /**
-     * @param AttributesProviderInterface $provider
-     * @param int                         $priority
+     * @param AttributesInjectionProviderInterface $provider
+     * @param int                                  $priority
      */
-    public function addProvider(AttributesProviderInterface $provider, $priority = 0)
+    public function addProvider(AttributesInjectionProviderInterface $provider, $priority = 0)
     {
         if ($provider instanceof ParameterAttributesProvider && 0 === $priority) {
             $priority = -INF;
@@ -63,8 +63,12 @@ class ShibbolethAttributesInjectionProviderManager
                 return (int)$first['priority'] > (int)$second['priority'] ? -1 : 1;
             });
             foreach ($providerPropertiesCollectionIterator as $providerProperties) {
-                /** @var AttributesProviderInterface $provider */
+                /** @var AttributesInjectionProviderInterface $provider */
                 $provider = $providerProperties['provider'];
+                dump(get_class($provider), $provider->getAttributes());
+                if (!$provider->isEnabled()) {
+                    continue;
+                }
                 $attributes = $provider->getAttributes();
                 foreach ($attributes as $name => $value) {
                     $attributeDefinition = null;
