@@ -28,8 +28,8 @@ class ShibbolethAuthenticationEntryPoint implements AuthenticationEntryPointInte
         }
         $url = $this->shibbolethServiceProvider->getLoginUrl($request->getUri());
         if (!$this->shibbolethServiceProvider->isReachable($url)) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('Shibboleth login is not responding at "%s".', $url));
-            throw new AuthenticationException('Shibboleth login is not responding.');
+            $this->log(basename(__FILE__) . ' - ' . sprintf('Shibboleth login is not available at "%s".', $url));
+            throw new AuthenticationException('Shibboleth login is not available.');
         }
         $this->log(basename(__FILE__) . ' - ' . sprintf('Redirecting to login at "%s"...', $url));
         return new RedirectResponse($url);
