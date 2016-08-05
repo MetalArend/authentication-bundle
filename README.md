@@ -376,6 +376,7 @@ Typical development setup
 Both using the overwrites and LDAP, there is a very easy setup to enable local development without installing Shibboleth.
 
 Enable the overwrites and provide the overwrite for the Shib-Identity-Provider attribute in config_dev.yml.
+Also enable the ldap_filter in config_dev.yml.
 
 ```yml
 # app/config/config_dev.yml
@@ -383,15 +384,15 @@ Enable the overwrites and provide the overwrite for the Shib-Identity-Provider a
 kuleuven_authentication:
     authentication_attribute_overwrites_enabled: true
     authentication_attribute_overwrites: {Shib-Identity-Provider: 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'}
+    authentication_attribute_ldap_enabled: true
 ```
 
-Enable the ldap_filter and add your uid by adding this to your parameters.yml(.dist).
+Add your uid by adding this to your parameters.yml(.dist). It will be ignored in production.
 
 ```yml
 # app/config/parameters.yml.dist
 ...
 parameters:
-    authentication_attribute_ldap_enabled: true
     authentication_attribute_ldap_filter: {uid: '<(string)your-uid>'}
 ```
 
