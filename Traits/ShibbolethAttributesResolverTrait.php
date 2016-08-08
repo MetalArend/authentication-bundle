@@ -52,7 +52,7 @@ trait ShibbolethAttributesResolverTrait
         if (!array_key_exists($name, $this->attributes)) {
             return null;
         }
-        
+
         return $this->attributes[$name];
     }
 
@@ -102,7 +102,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $value
      * @return bool
      */
-    function hasAttributeValue($name, $value = null)
+    public function hasAttributeValue($name, $value = null)
     {
         if (!$this->hasAttribute($name)) return false;
         return (empty($value) ? true : (array_search($value, $this->getArrayAttribute($name)) !== false));
@@ -111,7 +111,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string uid
      */
-    function getUID()
+    public function getUID()
     {
         return $this->getAttribute('Shib-Person-uid');
     }
@@ -121,7 +121,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string cn
      */
-    function getCommonName()
+    public function getCommonName()
     {
         return $this->getAttribute('Shib-Person-commonName');
     }
@@ -131,7 +131,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string cn
      */
-    function getFullName()
+    public function getFullName()
     {
         return $this->getCommonName();
     }
@@ -139,7 +139,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string givenName
      */
-    function getGivenName()
+    public function getGivenName()
     {
         return $this->getAttribute('Shib-Person-givenName');
     }
@@ -149,7 +149,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string givenName
      */
-    function getFirstName()
+    public function getFirstName()
     {
         return $this->getGivenName();
     }
@@ -157,7 +157,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string sn
      */
-    function getSurname()
+    public function getSurname()
     {
         return $this->getAttribute('Shib-Person-surname');
     }
@@ -167,7 +167,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string sn
      */
-    function getLastName()
+    public function getLastName()
     {
         return $this->getSurname();
     }
@@ -177,7 +177,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string cn|uid
      */
-    function getDisplayName()
+    public function getDisplayName()
     {
         return ($this->hasAttribute('Shib-Person-commonName')) ? $this->getCommonName() : $this->getUsername();
     }
@@ -185,7 +185,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string mail
      */
-    function getMail()
+    public function getMail()
     {
         return $this->getAttribute('Shib-Person-mail');
     }
@@ -195,7 +195,7 @@ trait ShibbolethAttributesResolverTrait
      *
      * @return string mail
      */
-    function getEmail()
+    public function getEmail()
     {
         return $this->getMail();
     }
@@ -203,7 +203,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string mail
      */
-    function getMails()
+    public function getMails()
     {
         return $this->getArrayAttribute('Shib-Person-mail');
     }
@@ -211,7 +211,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string affiliation
      */
-    function getAffiliation()
+    public function getAffiliation()
     {
         return $this->getAttribute('Shib-EP-UnscopedAffiliation');
     }
@@ -219,7 +219,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string scopedAffiliation
      */
-    function getScopedAffiliation()
+    public function getScopedAffiliation()
     {
         return $this->getAttribute('Shib-EP-ScopedAffiliation');
     }
@@ -228,7 +228,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $value
      * @return bool
      */
-    function hasAffiliation($value = null)
+    public function hasAffiliation($value = null)
     {
         return $this->hasAttributeValue('Shib-EP-UnscopedAffiliation', $value);
     }
@@ -237,7 +237,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $value
      * @return bool
      */
-    function hasScopedAffiliation($value = null)
+    public function hasScopedAffiliation($value = null)
     {
         return $this->hasAttributeValue('Shib-EP-ScopedAffiliation', $value);
     }
@@ -246,7 +246,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $scope
      * @return bool
      */
-    function isMember($scope = null)
+    public function isMember($scope = null)
     {
         return (empty($scope) ? $this->hasAffiliation('member') : $this->hasScopedAffiliation('member@' . $scope));
     }
@@ -255,7 +255,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $scope
      * @return bool
      */
-    function isEmployee($scope = null)
+    public function isEmployee($scope = null)
     {
         return (empty($scope) ? $this->hasAffiliation('employee') : $this->hasScopedAffiliation('employee@' . $scope));
     }
@@ -264,7 +264,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $scope
      * @return bool
      */
-    function isStudent($scope = null)
+    public function isStudent($scope = null)
     {
         return (empty($scope) ? $this->hasAffiliation('student') : $this->hasScopedAffiliation('student@' . $scope));
     }
@@ -273,7 +273,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $scope
      * @return bool
      */
-    function isStaff($scope = null)
+    public function isStaff($scope = null)
     {
         return (empty($scope) ? $this->hasAffiliation('staff') : $this->hasScopedAffiliation('staff@' . $scope));
     }
@@ -282,7 +282,7 @@ trait ShibbolethAttributesResolverTrait
      * @param null|string $scope
      * @return bool
      */
-    function isFaculty($scope = null)
+    public function isFaculty($scope = null)
     {
         return (empty($scope) ? $this->hasAffiliation('faculty') : $this->hasScopedAffiliation('faculty@' . $scope));
     }
@@ -290,7 +290,7 @@ trait ShibbolethAttributesResolverTrait
     /**
      * @return string logoutURL
      */
-    function getLogoutURL()
+    public function getLogoutURL()
     {
         return $this->getAttribute('Shib-logoutURL');
     }
