@@ -2,6 +2,8 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 class LdapAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
 {
     /**
@@ -20,6 +22,11 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
     protected $enabled;
 
     /**
+     * @var SessionInterface
+     */
+    protected $session;
+
+    /**
      * @param LdapService $ldapService
      * @param array       $filter
      * @param bool        $enabled
@@ -29,6 +36,14 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
         $this->ldapService = $ldapService;
         $this->filter = (!empty($filter) ? $filter : []);
         $this->enabled = $enabled;
+    }
+
+    /**
+     * @param SessionInterface $session
+     */
+    public function setSession(SessionInterface $session)
+    {
+        $this->session = $session;
     }
 
     /**
@@ -52,7 +67,18 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
             return [];
         }
 
-        $ldapResults = $this->ldapService->search($filter, $attributes, $limit, false);
+        // Retrieve from the session (cache)
+        $hash = 'shibboleth-authentication-' . md5(serialize($filter) . '-' . serialize($attributes) . '-' . $limit);
+        if (!empty($this->session) && $this->session->has($hash)) {
+            $ldapResults = $this->session->get($hash);
+        } else {
+            $ldapResults = $this->ldapService->search($filter, $attributes, $limit, false);
+            if (!empty($this->session) && isset($ldapResults['count']) && 0 !== $ldapResults['count']) {
+                // Save to the cache
+                $this->session->set($hash, $ldapResults);
+            }
+        }
+
         if (0 === $ldapResults['count']) {
             return [];
         }
