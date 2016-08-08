@@ -29,13 +29,20 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
     protected $userChecker;
 
     /**
+     * @var string
+     */
+    protected $providerKey;
+
+    /**
      * @param UserProviderInterface $userProvider
      * @param UserCheckerInterface  $userChecker
+     * @param string                $providerKey
      */
-    public function __construct(UserProviderInterface $userProvider, UserCheckerInterface $userChecker)
+    public function __construct(UserProviderInterface $userProvider, UserCheckerInterface $userChecker, $providerKey)
     {
         $this->userProvider = $userProvider;
         $this->userChecker = $userChecker;
+        $this->providerKey = $providerKey;
     }
 
     /**
@@ -87,7 +94,7 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
             $this->userChecker->checkPostAuth($user);
         }
 
-        $authenticatedToken = new KuleuvenUserToken($user, $user->getAttributes(), $token->getRoles());
+        $authenticatedToken = new KuleuvenUserToken($user, $user->getAttributes(), $this->providerKey, $token->getRoles());
         $authenticatedToken->setAuthenticated(true);
         $this->log(sprintf('Token authenticated for username "%s": %s', $authenticatedToken->getUsername(), $authenticatedToken));
 

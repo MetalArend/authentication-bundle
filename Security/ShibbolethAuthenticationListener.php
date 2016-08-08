@@ -52,17 +52,24 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
      */
     protected $defaultRoles;
 
+    /**
+     * @var string
+     */
+    protected $providerKey;
+
     public function __construct(
         ShibbolethServiceProvider $shibbolethServiceProvider,
         TokenStorageInterface $tokenStorage,
         AuthenticationManagerInterface $authenticationManager,
         AuthenticationEntryPointInterface $authenticationEntryPoint = null,
         EventDispatcherInterface $eventDispatcher = null,
-        array $defaultRoles = []
+        array $defaultRoles = [],
+        $providerKey = ''
     )
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
         $this->tokenStorage = $tokenStorage;
+        $this->providerKey = $providerKey;
         $this->authenticationManager = $authenticationManager;
         $this->authenticationEntryPoint = $authenticationEntryPoint;
         $this->eventDispatcher = $eventDispatcher;
@@ -121,6 +128,7 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
             $token = new KuleuvenUserToken(
                 $username,
                 $attributes,
+                $this->providerKey,
                 $this->defaultRoles
             );
             $this->log(sprintf('Token created for username "%s": %s', $username, $token));

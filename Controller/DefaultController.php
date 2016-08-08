@@ -3,7 +3,6 @@
 namespace Kuleuven\AuthenticationBundle\Controller;
 
 use Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Templating\EngineInterface;

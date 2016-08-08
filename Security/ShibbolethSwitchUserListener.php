@@ -76,7 +76,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         }
 
         $token = $this->tokenStorage->getToken();
-        if (!empty($token)) {
+        if (!empty($token) && $token instanceof KuleuvenUserToken) {
             if ('_exit' === $username) {
                 $originalToken = $this->getOriginalToken($token);
                 if (false === $originalToken) {
@@ -116,6 +116,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
      */
     private function attemptSwitchUser(Request $request, $username)
     {
+        /** @var KuleuvenUserToken $token */
         $token = $this->tokenStorage->getToken();
         $token->setUser($this->provider->refreshUser($token->getUser()));
 
@@ -151,8 +152,8 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $user = $this->provider->loadUserByUsername($username);
         $this->userChecker->checkPostAuth($user);
 
-        $roles = $user->getRoles();
         $attributes = $user->getAttributes();
+        $roles = $user->getRoles();
 
         // If there is an original token, only let them switch back to that user.
         if ($originalToken) {
@@ -161,7 +162,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
             $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $this->tokenStorage->getToken());
         }
 
-        $token = new KuleuvenUserToken($user, $attributes, $roles);
+        $token = new KuleuvenUserToken($user, $attributes, $this->providerKey, $roles);
         $token->setAuthenticated(true);
 
         if (null !== $this->dispatcher) {
@@ -175,10 +176,10 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
     /**
      * Gets the original Token from a switched one.
      *
-     * @param TokenInterface $token A switched TokenInterface instance
+     * @param KuleuvenUserToken $token A switched TokenInterface instance
      * @return TokenInterface|false The original TokenInterface instance, false if the current TokenInterface is not switched
      */
-    private function getOriginalToken(TokenInterface $token)
+    private function getOriginalToken(KuleuvenUserToken $token)
     {
         foreach ($token->getRoles() as $role) {
             if ($role instanceof SwitchUserRole) {

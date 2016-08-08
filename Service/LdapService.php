@@ -2,8 +2,6 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
 class LdapService
 {
     protected $rdn;
