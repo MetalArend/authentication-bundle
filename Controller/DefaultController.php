@@ -38,11 +38,10 @@ class DefaultController
     }
 
     /**
-     * @param Request $request
      * @return Response
      * @throws UnauthorizedHttpException
      */
-    public function indexAction(Request $request)
+    public function indexAction()
     {
         if (!$this->debug) {
             throw new UnauthorizedHttpException('Only available in debug mode.');
