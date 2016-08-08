@@ -187,8 +187,6 @@ services:
             - "%ldap_base%"
             - "%ldap_domain%"
             - "%ldap_port%"
-        calls:
-            - [setSession, ['@session']]
 
     kuleuven_authentication.service.ldap_attributes_provider:
         class: "%kuleuven_authentication.service.ldap_attributes_provider.class%"
@@ -196,6 +194,8 @@ services:
             - "@kuleuven_authentication.service.ldap"
             - "%authentication_attribute_ldap_filter%"
             - "%authentication_attribute_ldap_enabled%"
+        calls:
+            - [setSession, ['@session']]
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 

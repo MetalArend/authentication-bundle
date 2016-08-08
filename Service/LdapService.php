@@ -13,7 +13,6 @@ class LdapService
     protected $port;
     protected $handle;
     protected $bind;
-    protected $session;
 
     public function __construct(
         $rdn = '',
@@ -36,11 +35,6 @@ class LdapService
         if (!defined('LDAP_OPT_DIAGNOSTIC_MESSAGE')) {
             define('LDAP_OPT_DIAGNOSTIC_MESSAGE', 0x0032);
         }
-    }
-
-    public function setSession(SessionInterface $session)
-    {
-        $this->session = $session;
     }
 
     public function __destruct()
@@ -101,15 +95,6 @@ class LdapService
             return null;
         }
 
-        // Retrieve from the session (cache)
-        $hash = 'shibboleth-development' . '-' . md5(serialize($filter) . '-' . serialize($attributes) . '-' . $limit . '-' . $fuzzy);
-        if (!empty($this->session) && $this->session->has($hash)) {
-            $results = $this->session->get($hash);
-            if (!empty($results) && 0 !== $results['count']) {
-                return $results;
-            }
-        }
-
         // Bind
         $this->bind();
 
@@ -135,12 +120,6 @@ class LdapService
                 throw new \Exception('Could not search LDAP: ' . $this->error());
             }
             $results = \ldap_get_entries($this->handle, $search);
-
-            // Save to the session (cache)
-            if (!empty($this->session) && 0 !== $results['count']) {
-                // Save to the cache
-                $this->session->set($hash, $results);
-            }
         }
 
         // Return
