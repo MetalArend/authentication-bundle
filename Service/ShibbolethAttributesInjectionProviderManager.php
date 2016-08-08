@@ -70,6 +70,9 @@ class ShibbolethAttributesInjectionProviderManager
                     continue;
                 }
                 $attributes = $provider->getAttributes();
+                if (empty($attributes)) {
+                    continue;
+                }
                 foreach ($attributes as $name => $value) {
                     $attributeDefinition = null;
                     switch (true) {
