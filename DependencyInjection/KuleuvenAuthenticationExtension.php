@@ -10,7 +10,6 @@ use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListenerFacto
 use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationProvider;
 use Kuleuven\AuthenticationBundle\Service\LdapService;
 use Kuleuven\AuthenticationBundle\Service\LdapUserProvider;
-use Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

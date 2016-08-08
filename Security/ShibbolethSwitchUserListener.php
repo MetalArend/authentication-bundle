@@ -112,6 +112,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
      * @param Request $request A Request instance
      * @param string  $username
      * @return null|TokenInterface The new TokenInterface if successfully switched, null otherwise
+     * @throws AccessDeniedException
      */
     private function attemptSwitchUser(Request $request, $username)
     {

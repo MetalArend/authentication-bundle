@@ -40,6 +40,7 @@ class DefaultController
     /**
      * @param Request $request
      * @return Response
+     * @throws UnauthorizedHttpException
      */
     public function indexAction(Request $request)
     {

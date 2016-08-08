@@ -419,6 +419,7 @@ Upcoming
 - TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
 - TODO Implement ldap.jquery.js
 - TODO Activate Person Data API
+- TODO Instead of overwriting the switchuser_listener, add a new Security Factory
 - TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
     - For KU Leuven: To request a commercial certificate, please refer to: https://certificates.kuleuven.be
     - SSL certificates: Download the certificate from http://shib.kuleuven.be/download/metadata/metadata.associatie.kuleuven.be.crt

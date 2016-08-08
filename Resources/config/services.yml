@@ -215,7 +215,7 @@ services:
 
     # Switch User
 
-    # Overwrite the switchuser_listener # TODO !!! instead of overwriting, add a new Security Factory
+    # Overwrite the switchuser_listener
     security.authentication.switchuser_listener:
         class: "%kuleuven_authentication.security.authentication.switchuser_listener.class%"
         public: true # because event subscribers are lazy-loaded
