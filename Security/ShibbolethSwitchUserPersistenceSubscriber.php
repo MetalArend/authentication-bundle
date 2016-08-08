@@ -60,7 +60,7 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
         if (empty($token) || !$this->supportsToken($token)) {
             return null;
         }
-        $this->log(basename(__FILE__) . ' - ' . sprintf('Persisted token found: %s', $token));
+        $this->log(sprintf('Persisted token found: %s', $token));
 
         $token = $this->authenticationManager->authenticate($token);
         $this->tokenStorage->setToken($token);
@@ -73,10 +73,10 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
         if ($event instanceof ShibbolethSwitchUserEvent) {
             if ($event->getTargetUser()->getUsername() !== $this->shibbolethServiceProvider->getUsername()) {
                 $this->session->set($this->sessionKey, $event->getToken());
-                $this->log(basename(__FILE__) . ' - ' . sprintf('Token persisted for username "%s": %s', $event->getTargetUser()->getUsername(), $event->getToken()));
+                $this->log(sprintf('Token persisted for username "%s": %s', $event->getTargetUser()->getUsername(), $event->getToken()));
             } else {
                 $this->session->remove($this->sessionKey);
-                $this->log(basename(__FILE__) . ' - ' . sprintf('Persisted token cleared: %s', $event->getToken()));
+                $this->log(sprintf('Persisted token cleared: %s', $event->getToken()));
             }
         }
     }

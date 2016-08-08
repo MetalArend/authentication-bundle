@@ -80,26 +80,26 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
             if ('_exit' === $username) {
                 $originalToken = $this->getOriginalToken($token);
                 if (false === $originalToken) {
-                    $this->log(basename(__FILE__) . ' - ' . 'Exit attempt ignored, no original token found');
+                    $this->log('Exit attempt ignored, no original token found');
                 } else {
-                    $this->log(basename(__FILE__) . ' - ' . sprintf('Original token found: %s', $originalToken));
+                    $this->log(sprintf('Original token found: %s', $originalToken));
                     $authenticationToken = $this->attemptSwitchUser($request, $originalToken->getUsername());
-                    $this->log(basename(__FILE__) . ' - ' . sprintf('Switch to new authentication token: %s', $authenticationToken));
+                    $this->log(sprintf('Switch to new authentication token: %s', $authenticationToken));
                     $this->tokenStorage->setToken($authenticationToken);
                 }
             } else {
                 try {
                     $authenticationToken = $this->attemptSwitchUser($request, $request->get($this->usernameParameter));
-                    $this->log(basename(__FILE__) . ' - ' . sprintf('Switch to new authentication token: %s', $authenticationToken));
+                    $this->log(sprintf('Switch to new authentication token: %s', $authenticationToken));
                     $this->tokenStorage->setToken($authenticationToken);
                 } catch (AuthenticationException $e) {
-                    $this->log(basename(__FILE__) . ' - ' . sprintf('Switch User failed: "%s"', $e->getMessage()));
+                    $this->log(sprintf('Switch User failed: "%s"', $e->getMessage()));
                     throw new \LogicException(sprintf('Switch User failed: "%s"', $e->getMessage()));
                 }
             }
         }
 
-        $this->log(basename(__FILE__) . ' - ' . sprintf('Redirect to original url: %s', $request->getUri()));
+        $this->log(sprintf('Redirect to original url: %s', $request->getUri()));
         $request->query->remove($this->usernameParameter);
         $request->server->set('QUERY_STRING', http_build_query($request->query->all()));
         $response = new RedirectResponse($request->getUri(), 302);
@@ -119,20 +119,20 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $token->setUser($this->provider->refreshUser($token->getUser()));
 
         if ($token->getUsername() === $username) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('Token already for username "%s", keep token: %s', $username, $token));
+            $this->log(sprintf('Token already for username "%s", keep token: %s', $username, $token));
             return $token;
         }
 
         $originalToken = $this->getOriginalToken($token);
         if (false !== $originalToken) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('Original token found: %s', $originalToken));
+            $this->log(sprintf('Original token found: %s', $originalToken));
             // User is impersonating someone, they are trying to switch directly to another user, make sure original user has access.
             if (false === $this->accessDecisionManager->decide($originalToken, [$this->role])) {
-                $this->log(basename(__FILE__) . ' - ' . sprintf('Original token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
+                $this->log(sprintf('Original token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
                 throw new AccessDeniedException();
             }
             if ($originalToken->getUsername() === $username) {
-                $this->log(basename(__FILE__) . ' - ' . sprintf('Original token is already for "%s", switching to original token: %s', $username, $originalToken));
+                $this->log(sprintf('Original token is already for "%s", switching to original token: %s', $username, $originalToken));
                 if (null !== $this->dispatcher) {
                     $switchEvent = new ShibbolethSwitchUserEvent($request, $originalToken->getUser(), $originalToken);
                     $this->dispatcher->dispatch(SecurityEvents::SWITCH_USER, $switchEvent);
@@ -140,11 +140,11 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
                 return $originalToken;
             }
         } elseif (false === $this->accessDecisionManager->decide($token, [$this->role])) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('Token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
+            $this->log(sprintf('Token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
             throw new AccessDeniedException();
         }
 
-        $this->log(basename(__FILE__) . ' - ' . sprintf('Attempting to impersonate "%s"', $username));
+        $this->log(sprintf('Attempting to impersonate "%s"', $username));
 
         /** @var KuleuvenUserInterface $user */
         $user = $this->provider->loadUserByUsername($username);
