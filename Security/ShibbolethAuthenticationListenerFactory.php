@@ -36,7 +36,8 @@ class ShibbolethAuthenticationListenerFactory implements SecurityFactoryInterfac
         $providerId = 'security.authentication.provider.' . $this->key . '.' . $id;
         $container
             ->setDefinition($providerId, new DefinitionDecorator($this->key . '.security.authentication.provider'))
-            ->replaceArgument(0, new Reference($userProvider));
+            ->replaceArgument(0, new Reference($userProvider))
+            ->replaceArgument(2, $this->key);
         return $providerId;
     }
 
@@ -55,7 +56,8 @@ class ShibbolethAuthenticationListenerFactory implements SecurityFactoryInterfac
         $listenerId = 'security.authentication.listener.' . $this->key . '.' . $id;
         $container
             ->setDefinition($listenerId, new DefinitionDecorator($this->key . '.security.authentication.listener'))
-            ->replaceArgument(5, $defaultRoles);
+            ->replaceArgument(5, $defaultRoles)
+            ->replaceArgument(6, $this->key);
 
         return $listenerId;
     }

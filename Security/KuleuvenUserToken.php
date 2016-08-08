@@ -11,11 +11,15 @@ class KuleuvenUserToken extends AbstractToken implements TokenInterface
 {
     use ShibbolethAttributesResolverTrait;
 
-    public function __construct($user = null, array $attributes = [], array $roles = [])
+    protected $providerKey;
+
+    public function __construct($user = null, array $attributes = [], $providerKey, array $roles = [])
     {
         $this->setUser($user);
-        
+
         $this->setAttributes($attributes);
+
+        $this->providerKey = $providerKey;
 
         if (empty($roles) && $user instanceof UserInterface) {
             $roles = $user->getRoles();
@@ -45,6 +49,6 @@ class KuleuvenUserToken extends AbstractToken implements TokenInterface
 
     public function getProviderKey()
     {
-        return 'kuleuven_authentication';
+        return $this->providerKey;
     }
 }

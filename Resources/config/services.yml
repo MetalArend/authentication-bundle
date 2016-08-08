@@ -140,6 +140,7 @@ services:
         arguments:
             - "" # userProvider
             - "@security.user_checker"
+            - "" # providerKey
         calls:
             - [setLogger, ["@?logger"]]
         tags:
@@ -154,7 +155,8 @@ services:
             - "@security.authentication.manager"
             - "@kuleuven_authentication.security.authentication.entry_point"
             - "@event_dispatcher"
-            - ""
+            - [] # roles
+            - "" # providerKey
         calls:
             - [setLogger, ["@?logger"]]
         tags:
