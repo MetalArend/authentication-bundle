@@ -34,7 +34,7 @@ class PersonDataService
             throw new \Exception('Could not get person data for ' . $uid . ': ' . json_encode($decodedOutput));
         }
         $user = $decodedOutput->d;
-        $mainWorkAddresses = array_filter($user->WorkAddresses->results, function ($value) {
+        $mainWorkAddresses = array_filter($user->WorkAddresses->results, function (\stdClass $value) {
             return $value->isMainWorkAddress;
         });
         $mainWorkAddress = reset($mainWorkAddresses);
