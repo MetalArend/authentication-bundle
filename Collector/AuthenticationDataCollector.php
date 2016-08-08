@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\Role\RoleInterface;
@@ -32,15 +33,22 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     protected $shibbolethServiceProvider;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @param ShibbolethServiceProvider   $shibbolethServiceProvider
      * @param TokenStorageInterface|null  $tokenStorage
      * @param RoleHierarchyInterface|null $roleHierarchy
+     * @param KernelInterface             $kernel
      */
-    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, TokenStorageInterface $tokenStorage = null, RoleHierarchyInterface $roleHierarchy = null)
+    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, TokenStorageInterface $tokenStorage = null, RoleHierarchyInterface $roleHierarchy = null, KernelInterface $kernel)
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
         $this->tokenStorage = $tokenStorage;
         $this->roleHierarchy = $roleHierarchy;
+        $this->kernel = $kernel;
         $this->data = [];
     }
 
@@ -104,7 +112,7 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
-        $image = base64_encode(file_get_contents(__DIR__ . '/../Resources/images/shibboleth.png'));
+        $image = base64_encode(file_get_contents($this->kernel->locateResource('@KuleuvenAuthenticationBundle/Resources/images/shibboleth.png')));
         $this->data = array_replace($this->data, [
             'image'      => $image,
             'shibboleth' => [
