@@ -38,86 +38,86 @@ interface KuleuvenUserInterface extends UserInterface
     /**
      * @return string cn
      */
-    function getCommonName();
+    public function getCommonName();
 
     /**
      * @return string givenName
      */
-    function getGivenName();
+    public function getGivenName();
 
     /**
      * @return string sn
      */
-    function getSurname();
+    public function getSurname();
 
     /**
      * Alias for cn, fallback to uid
      *
      * @return string cn|uid
      */
-    function getDisplayName();
+    public function getDisplayName();
 
     /**
      * @return string mail (single)
      */
-    function getEmail();
+    public function getEmail();
 
     /**
      * @return string affiliation
      */
-    function getAffiliation();
+    public function getAffiliation();
 
     /**
      * @return string scopedAffiliation
      */
-    function getScopedAffiliation();
+    public function getScopedAffiliation();
 
     /**
      * @param null|string $value
      * @return bool
      */
-    function hasAffiliation($value = null);
+    public function hasAffiliation($value = null);
 
     /**
      * @param null|string $value
      * @return bool
      */
-    function hasScopedAffiliation($value = null);
+    public function hasScopedAffiliation($value = null);
 
     /**
      * @param null|string $scope
      * @return bool
      */
-    function isMember($scope = null);
+    public function isMember($scope = null);
 
     /**
      * @param null|string $scope
      * @return bool
      */
-    function isEmployee($scope = null);
+    public function isEmployee($scope = null);
 
     /**
      * @param null|string $scope
      * @return bool
      */
-    function isStudent($scope = null);
+    public function isStudent($scope = null);
 
     /**
      * @param null|string $scope
      * @return bool
      */
-    function isStaff($scope = null);
+    public function isStaff($scope = null);
 
     /**
      * @param null|string $scope
      * @return bool
      */
-    function isFaculty($scope = null);
+    public function isFaculty($scope = null);
 
     /**
      * @return string logoutURL
      */
-    function getLogoutURL();
+    public function getLogoutURL();
 
     /**
      * @return string

@@ -4,6 +4,7 @@ parameters:
 
     kuleuven_authentication.controller.default.class: 'Kuleuven\AuthenticationBundle\Controller\DefaultController'
     kuleuven_authentication.controller.security.class: 'Kuleuven\AuthenticationBundle\Controller\SecurityController'
+    kuleuven_authentication.service.attribute_definitions_provider.class: 'Kuleuven\AuthenticationBundle\Service\AttributeDefinitionsProvider'
     kuleuven_authentication.service.parameter_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider'
     kuleuven_authentication.service.firewall_helper.class: 'Kuleuven\AuthenticationBundle\Service\FirewallHelper'
     twig.extension.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Twig\ShibbolethExtension'
@@ -49,6 +50,12 @@ services:
     kuleuven_authentication.controller.security:
         class: "%kuleuven_authentication.controller.security.class%"
 
+    kuleuven_authentication.service.attribute_definitions_provider:
+        class: "%kuleuven_authentication.service.attribute_definitions_provider.class%"
+        arguments:
+            - "@kernel"
+            - "%authentication_attribute_definitions%"
+
     kuleuven_authentication.service.parameter_attributes_provider:
         class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
         arguments:
@@ -78,6 +85,7 @@ services:
             - "@kuleuven_authentication.service.shibboleth_service_provider"
             - "@security.token_storage"
             - "@security.role_hierarchy"
+            - "@kernel"
         tags:
             -
                 name: data_collector
@@ -90,7 +98,7 @@ services:
     kuleuven_authentication.service.shibboleth_attributes_injector_manager:
         class: "%kuleuven_authentication.service.shibboleth_attributes_injector_manager.class%"
         arguments:
-            - "%authentication_attribute_definitions%"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 255 }
 
@@ -98,12 +106,13 @@ services:
         class: "%kuleuven_authentication.service.shibboleth_user_provider.class%"
         arguments:
             - "@kuleuven_authentication.service.shibboleth_service_provider"
-            - "%authentication_attribute_definitions%"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
 
     kuleuven_authentication.service.shibboleth_service_provider:
         class: "%kuleuven_authentication.service.shibboleth_service_provider.class%"
         arguments:
             - "@request_stack"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
             - "%shibboleth_is_secured_handler%"
             - "%shibboleth_handler_path%"
             - "%shibboleth_status_path%"
@@ -114,7 +123,6 @@ services:
             - "%shibboleth_authenticated_attribute%"
             - "%shibboleth_logout_url_attribute%"
             - "%shibboleth_default_charset%"
-            - "%authentication_attribute_definitions%"
 
     kuleuven_authentication.security.authentication.entry_point:
         class: "%kuleuven_authentication.security.authentication.entry_point.class%"
@@ -195,7 +203,7 @@ services:
         class: "%kuleuven_authentication.service.ldap_user_provider.class%"
         arguments:
             - "@kuleuven_authentication.service.ldap_attributes_provider"
-            - "%authentication_attribute_definitions%"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
 
     # Person Data API
 
@@ -207,7 +215,7 @@ services:
 
     # Switch User
 
-    # Overwrite the switchuser_listener # TODO !!! instead of overwriting, add a new Security Factory
+    # Overwrite the switchuser_listener
     security.authentication.switchuser_listener:
         class: "%kuleuven_authentication.security.authentication.switchuser_listener.class%"
         public: true # because event subscribers are lazy-loaded

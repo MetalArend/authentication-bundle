@@ -3,7 +3,6 @@
 namespace Kuleuven\AuthenticationBundle;
 
 use Kuleuven\AuthenticationBundle\Compiler\AuthenticationAttributesProviderPass;
-use Kuleuven\AuthenticationBundle\Compiler\AuthenticationAttributeDefinitionsProviderPass;
 use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListenerFactory;
 //use Kuleuven\AuthenticationBundle\Security\ShibbolethSwitchUserListenerFactory;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
@@ -17,7 +16,6 @@ class KuleuvenAuthenticationBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass(new AuthenticationAttributesProviderPass());
-        $container->addCompilerPass(new AuthenticationAttributeDefinitionsProviderPass());
 
         /** @var SecurityExtension $extension */
         $extension = $container->getExtension('security');

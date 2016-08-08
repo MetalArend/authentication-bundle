@@ -44,12 +44,12 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
     public function authenticate(TokenInterface $token)
     {
         if (!$this->supports($token)) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('Token not supported: %s', $token));
+            $this->log(sprintf('Token not supported: %s', $token));
             return null;
         }
 
         if (!$user = $token->getUser()) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('User not found in token: %s', $token));
+            $this->log(sprintf('User not found in token: %s', $token));
             throw new BadCredentialsException('User not found in request.');
         }
 
@@ -64,10 +64,10 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
                 $user = $this->userProvider->loadUserByUsername($username);
             }
             if (empty($user) || !$user instanceof UserInterface) {
-                $this->log(basename(__FILE__) . ' - ' . sprintf('User not found for username "%s"', $username));
+                $this->log(sprintf('User not found for username "%s"', $username));
                 throw new AuthenticationException('Shibboleth authentication failed.');
             }
-            $this->log(basename(__FILE__) . ' - ' . sprintf('User found for username "%s": %s', $username, $user));
+            $this->log(sprintf('User found for username "%s": %s', $username, $user));
 
             foreach ($token->getRoles() as $role) {
                 if ($role instanceof SwitchUserRole) {
@@ -79,7 +79,7 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
                 }
             }
         } catch (UsernameNotFoundException $notFound) {
-            $this->log(basename(__FILE__) . ' - ' . sprintf('User not found for username "%s": %s', $username, $notFound->getMessage()));
+            $this->log(sprintf('User not found for username "%s": %s', $username, $notFound->getMessage()));
             throw new AuthenticationException('Shibboleth authentication failed.', 0, $notFound);
         }
 
@@ -89,7 +89,7 @@ class ShibbolethAuthenticationProvider implements AuthenticationProviderInterfac
 
         $authenticatedToken = new KuleuvenUserToken($user, $user->getAttributes(), $token->getRoles());
         $authenticatedToken->setAuthenticated(true);
-        $this->log(basename(__FILE__) . ' - ' . sprintf('Token authenticated for username "%s": %s', $authenticatedToken->getUsername(), $authenticatedToken));
+        $this->log(sprintf('Token authenticated for username "%s": %s', $authenticatedToken->getUsername(), $authenticatedToken));
 
         return $authenticatedToken;
     }

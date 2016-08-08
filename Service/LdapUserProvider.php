@@ -17,18 +17,18 @@ class LdapUserProvider implements UserProviderInterface
     protected $ldapAttributesProvider;
 
     /**
-     * @var array
+     * @var AttributeDefinitionsProviderInterface
      */
-    protected $attributeDefinitions;
+    protected $attributeDefinitionsProvider;
 
     /**
-     * @param LdapAttributesProvider $ldapAttributesProvider
-     * @param array                  $attributeDefinitions
+     * @param LdapAttributesProvider                $ldapAttributesProvider
+     * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider
      */
-    public function __construct(LdapAttributesProvider $ldapAttributesProvider, array $attributeDefinitions)
+    public function __construct(LdapAttributesProvider $ldapAttributesProvider, AttributeDefinitionsProviderInterface $attributeDefinitionsProvider)
     {
         $this->ldapAttributesProvider = $ldapAttributesProvider;
-        $this->attributeDefinitions = $attributeDefinitions;
+        $this->attributeDefinitionsProvider = $attributeDefinitionsProvider;
     }
 
     /**
@@ -41,8 +41,9 @@ class LdapUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('Username %s not found', $username));
         }
 
+        $attributeDefinitions = $this->attributeDefinitionsProvider->getAttributeDefinitions();
         $attributes = [];
-        foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
+        foreach ($attributeDefinitions as $idOrAlias => $attributeDefinition) {
             $value = null;
             switch (true) {
                 case isset($ldapAttributes[$idOrAlias]):

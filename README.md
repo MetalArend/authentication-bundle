@@ -131,7 +131,7 @@ This bundle however lets you overwrite any attribute from within your parameters
 through the '\Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider' service that uses
 the 'authentication_attribute_overwrites' parameter to inject an array of server attributes.
 
-By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your ldap filter.
+By default this feature is disabled, so you have to explicitly enable it.
 
 ```yml
 # app/config/config_dev.yml
@@ -294,8 +294,7 @@ A non-exhaustive list:
 | KULAssocLibisNbr            |                                                         | ?          |
 | KULAssocMigrateID           |                                                         | ?          |
 
-By default, the 'authentication_attribute_definitions' parameter is filled with the KU Leuven shibboleth attribute definitions.
-You can always override these definitions by overwriting the parameter.
+You can always extend these definitions by adding definitions into the parameter 'authentication_attribute_definitions'.
 
 LDAP
 ====
@@ -323,7 +322,7 @@ You can use LDAP to provide Shibboleth server attributes,
 through the '\Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider' service that uses
 the 'authentication_attribute_ldap_filter' parameter to inject an LDAP result array of server attributes.
 
-By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your ldap filter.
+By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your LDAP filter.
 Make sure the filter is unique enough to only provide one user.
 
 ```yml
@@ -376,7 +375,7 @@ Typical development setup
 Both using the overwrites and LDAP, there is a very easy setup to enable local development without installing Shibboleth.
 
 Enable the overwrites and provide the overwrite for the Shib-Identity-Provider attribute in config_dev.yml.
-Also enable the ldap_filter in config_dev.yml.
+Also enable LDAP in config_dev.yml.
 
 ```yml
 # app/config/config_dev.yml
@@ -399,26 +398,28 @@ parameters:
 Extra
 =====
 
-There is a default route /authentication.
+There is a default route "/authentication".
 
 Check if you are behind a certain firewall with the FirewallHelper service.
 
 Upcoming
 ========
 
-- TODO Update documentation
 - TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
 - TODO Check if the Shib-Handler attribute is present, and give notice if it is different than the configuration
 - TODO Add the expected identity-provider value, and check for it on production (and use it locally as an overwrite?)
 - TODO Send notice if LDAP filter returns more than 1 user
 - TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
-- TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AuthenticationAttributeDefinitionsProviderPass
+- TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
 - TODO Make it possible to extend vs overwrite the attribute definitions (extra parameter?)
 - TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesProviderInterface
+- TODO provide examples: how to add an automatic user save on visit
 - TODO Add providerKey in token support checks
 - TODO Implement LoggerAware in some extra classes
 - TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
 - TODO Implement ldap.jquery.js
+- TODO Activate Person Data API
+- TODO Instead of overwriting the switchuser_listener, add a new Security Factory
 - TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
     - For KU Leuven: To request a commercial certificate, please refer to: https://certificates.kuleuven.be
     - SSL certificates: Download the certificate from http://shib.kuleuven.be/download/metadata/metadata.associatie.kuleuven.be.crt

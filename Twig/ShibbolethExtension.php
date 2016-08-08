@@ -19,7 +19,7 @@ class ShibbolethExtension extends \Twig_Extension implements \Twig_Extension_Glo
     /**
      * @param ShibbolethServiceProvider $shibbolethServiceProvider
      */
-    function __construct(ShibbolethServiceProvider $shibbolethServiceProvider)
+    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider)
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
     }

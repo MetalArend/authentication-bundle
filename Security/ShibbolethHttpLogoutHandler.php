@@ -59,7 +59,7 @@ class ShibbolethHttpLogoutHandler implements LogoutHandlerInterface, LogoutSucce
             }
         }
         $url = $this->shibbolethServiceProvider->getLogoutUrl($target);
-        $this->log(basename(__FILE__) . ' - ' . sprintf('Redirecting after logout to "%s"...', $url));
+        $this->log(sprintf('Redirecting after logout to "%s"...', $url));
         return new RedirectResponse($url);
     }
 }

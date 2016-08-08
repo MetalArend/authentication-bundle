@@ -10,7 +10,6 @@ use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListenerFacto
 use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationProvider;
 use Kuleuven\AuthenticationBundle\Service\LdapService;
 use Kuleuven\AuthenticationBundle\Service\LdapUserProvider;
-use Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -44,13 +43,11 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
         $config = $this->processConfiguration($configuration, $configs);
 
         // Attribute definitions
-        // Default values will be provided by AuthenticationAttributeDefinitionsProviderPass
         if (isset($config['authentication_attribute_definitions'])) {
             $container->setParameter('authentication_attribute_definitions', $config['authentication_attribute_definitions']);
         } elseif (!$container->hasParameter('authentication_attribute_definitions')) {
             $container->setParameter('authentication_attribute_definitions', []);
         }
-        // Injectors are provided by AuthenticationAttributesProviderPass
         $container->setParameter('authentication_attribute_overwrites_enabled', $config['authentication_attribute_overwrites_enabled']);
         if (isset($config['authentication_attribute_overwrites'])) {
             $container->setParameter('authentication_attribute_overwrites', $config['authentication_attribute_overwrites']);
