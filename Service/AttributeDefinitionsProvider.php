@@ -1,34 +1,29 @@
 <?php
 
-namespace Kuleuven\AuthenticationBundle\Compiler;
+namespace Kuleuven\AuthenticationBundle\Service;
 
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\KernelInterface;
 
-class AuthenticationAttributeDefinitionsProviderPass implements CompilerPassInterface
+class AttributeDefinitionsProvider implements AttributeDefinitionsProviderInterface
 {
-    protected $xmlFile;
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
 
     protected $attributeDefinitions;
 
     protected $multivalues;
 
-    public function __construct()
+    /**
+     * @param KernelInterface $kernel
+     * @param array           $attributeDefinitions
+     */
+    public function __construct(KernelInterface $kernel, $attributeDefinitions)
     {
-        $this->xmlFile = __DIR__ . '/../Resources/config/attribute-map/attribute-map.xml';
+        $this->kernel = $kernel;
 
-        // Add default Shibboleth definitions
-        // https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAttributeAccess
-        $this->attributeDefinitions = [
-            'Shib-Application-ID'         => ['id' => 'Shib-Application-ID', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-Session-ID'             => ['id' => 'Shib-Session-ID', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-Identity-Provider'      => ['id' => 'Shib-Identity-Provider', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-Authentication-Instant' => ['id' => 'Shib-Authentication-Instant', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-Authentication-Method'  => ['id' => 'Shib-Authentication-Method', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-AuthnContext-Class'     => ['id' => 'Shib-AuthnContext-Class', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-AuthnContext-Decl'      => ['id' => 'Shib-AuthnContext-Decl', 'names' => [], 'aliases' => [], 'multivalue' => false],
-            'Shib-Handler'                => ['id' => 'Shib-Handler', 'names' => [], 'aliases' => [], 'multivalue' => false],
-        ];
+        $this->attributeDefinitions = $attributeDefinitions;
 
         // Hard-coded, until there is a way to read this
         $this->multivalues = [
@@ -82,11 +77,29 @@ class AuthenticationAttributeDefinitionsProviderPass implements CompilerPassInte
         ];
     }
 
-    public function process(ContainerBuilder $container)
+    public function getAttributeDefinitions()
     {
-        $xml = simplexml_load_file($this->xmlFile);
+        // Add default Shibboleth definitions
+        // https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAttributeAccess
+        $attributeDefinitions = [
+            'Shib-Application-ID'         => ['id' => 'Shib-Application-ID', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-Session-ID'             => ['id' => 'Shib-Session-ID', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-Identity-Provider'      => ['id' => 'Shib-Identity-Provider', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-Authentication-Instant' => ['id' => 'Shib-Authentication-Instant', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-Authentication-Method'  => ['id' => 'Shib-Authentication-Method', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-AuthnContext-Class'     => ['id' => 'Shib-AuthnContext-Class', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-AuthnContext-Decl'      => ['id' => 'Shib-AuthnContext-Decl', 'names' => [], 'aliases' => [], 'multivalue' => false],
+            'Shib-Handler'                => ['id' => 'Shib-Handler', 'names' => [], 'aliases' => [], 'multivalue' => false],
+        ];
 
-        $attributeDefinitions = $this->attributeDefinitions;
+        $resource = '@KuleuvenAuthenticationBundle/Resources/config/attribute-map/attribute-map.xml';
+        try {
+            $path = $this->kernel->locateResource($resource);
+        } catch (\InvalidArgumentException $exception) {
+            throw new \InvalidArgumentException(sprintf('Unable to load "%s"', $resource), 0, $exception);
+        }
+
+        $xml = simplexml_load_file($path);
 
         /** @var \SimpleXMLElement $xmlElement */
         foreach ($xml->children() as $xmlElement) {
@@ -113,6 +126,21 @@ class AuthenticationAttributeDefinitionsProviderPass implements CompilerPassInte
             }
         }
 
-        $container->setParameter('authentication_attribute_definitions', $attributeDefinitions);
+        foreach ($this->attributeDefinitions as $attributeDefinition) {
+            $id = $attributeDefinition['id'];
+            $aliases = isset($attributeDefinition['aliases']) ? $attributeDefinition['aliases'] : [];
+            if (isset($attributeDefinitions[$id])) {
+                // Remove already present aliases
+                foreach ($attributeDefinitions['aliases'] as $alias) {
+                    unset($attributeDefinitions[$alias]);
+                }
+            }
+            $attributeDefinitions[$id] = $attributeDefinition;
+            foreach ($aliases as $alias) {
+                $attributeDefinitions[$alias] =& $attributeDefinitions[$id];
+            }
+        }
+
+        return $attributeDefinitions;
     }
 }

@@ -17,18 +17,18 @@ class ShibbolethUserProvider implements UserProviderInterface
     protected $shibbolethServiceProvider;
 
     /**
-     * @var array
+     * @var AttributeDefinitionsProviderInterface
      */
-    protected $attributeDefinitions;
+    protected $attributeDefinitionsProvider;
 
     /**
-     * @param ShibbolethServiceProvider $shibbolethServiceProvider
-     * @param array                     $attributeDefinitions
+     * @param ShibbolethServiceProvider             $shibbolethServiceProvider
+     * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider
      */
-    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, array $attributeDefinitions)
+    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, AttributeDefinitionsProviderInterface $attributeDefinitionsProvider)
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
-        $this->attributeDefinitions = $attributeDefinitions;
+        $this->attributeDefinitionsProvider = $attributeDefinitionsProvider;
     }
 
     /**
@@ -43,12 +43,13 @@ class ShibbolethUserProvider implements UserProviderInterface
             throw new UsernameNotFoundException(sprintf('User %s is not authenticated by Shibboleth.', $username));
         }
 
+        $attributeDefinitions = $this->attributeDefinitionsProvider->getAttributeDefinitions();
         $attributes = $this->shibbolethServiceProvider->getAttributes();
         foreach ($attributes as $name => &$value) {
-            if (!isset($this->attributeDefinitions[$name])) {
+            if (!isset($attributeDefinitions[$name])) {
                 continue;
             }
-            $attributeDefinition = $this->attributeDefinitions[$name];
+            $attributeDefinition = $attributeDefinitions[$name];
             $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : 'UTF-8';
             if ($charset == 'UTF-8') {
                 $value = utf8_decode($value);

@@ -14,17 +14,17 @@ class ShibbolethAttributesInjectionProviderManager
     protected $providerPropertiesCollection;
 
     /**
-     * @var array
+     * @var AttributeDefinitionsProviderInterface
      */
-    protected $attributeDefinitions;
+    protected $attributeDefinitionsProvider;
 
     /**
-     * @param $attributeDefinitions
+     * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider
      */
-    public function __construct($attributeDefinitions)
+    public function __construct(AttributeDefinitionsProviderInterface $attributeDefinitionsProvider)
     {
+        $this->attributeDefinitionsProvider = $attributeDefinitionsProvider;
         $this->providerPropertiesCollection = new ArrayCollection();
-        $this->attributeDefinitions = $attributeDefinitions;
     }
 
     /**
@@ -49,8 +49,9 @@ class ShibbolethAttributesInjectionProviderManager
         }
 
         if (!empty($this->providerPropertiesCollection)) {
+            $attributeDefinitions = $this->attributeDefinitionsProvider->getAttributeDefinitions();
             $lcIdOrAliasMap = [];
-            foreach ($this->attributeDefinitions as $idOrAlias => $attributeDefinition) {
+            foreach ($attributeDefinitions as $idOrAlias => $attributeDefinition) {
                 $lcIdOrAliasMap[strtolower($idOrAlias)] = $idOrAlias;
             }
             $server = $event->getRequest()->server;
@@ -72,11 +73,11 @@ class ShibbolethAttributesInjectionProviderManager
                 foreach ($attributes as $name => $value) {
                     $attributeDefinition = null;
                     switch (true) {
-                        case isset($this->attributeDefinitions[$name]):
-                            $attributeDefinition = $this->attributeDefinitions[$name];
+                        case isset($attributeDefinitions[$name]):
+                            $attributeDefinition = $attributeDefinitions[$name];
                             break;
-                        case isset($lcIdOrAliasMap[$name], $this->attributeDefinitions[$lcIdOrAliasMap[$name]]):
-                            $attributeDefinition = $this->attributeDefinitions[$lcIdOrAliasMap[$name]];
+                        case isset($lcIdOrAliasMap[$name], $attributeDefinitions[$lcIdOrAliasMap[$name]]):
+                            $attributeDefinition = $attributeDefinitions[$lcIdOrAliasMap[$name]];
                             break;
                         default:
                             continue 2; // switch is considered a looping structure, we have to continue the foreach
