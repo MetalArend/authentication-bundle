@@ -4,7 +4,6 @@ namespace Kuleuven\AuthenticationBundle\Service;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\Security\Http\Firewall;
 
 class ShibbolethAttributesInjectionProviderManager
 {
