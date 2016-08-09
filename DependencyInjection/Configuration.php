@@ -66,7 +66,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('ldap_base')->defaultValue('ou=people,dc=kuleuven,dc=be')->end()
                 ->scalarNode('ldap_domain')->defaultValue('ldap.kuleuven.be')->cannotBeEmpty()->end()
                 ->scalarNode('ldap_port')->defaultValue('389')->end()
-                ->enumNode('ldap_encryption')->values('none', 'ssl', 'tls')->defaultValue('none')->end()
+                ->enumNode('ldap_encryption')->values(['none', 'ssl', 'tls'])->defaultValue('none')->end()
                 ->booleanNode('ldap_referrals')->defaultFalse()->end()
                 ->booleanNode('ldap_version')->defaultValue('3')->end()
                 ->booleanNode('ldap_debug')->defaultFalse()->end()
