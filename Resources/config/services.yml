@@ -174,14 +174,21 @@ services:
 
     # LDAP
 
+    kuleuven_authentication.service._ldap:
+        public:     false
+        class:      'Symfony\Component\Ldap\Ldap'
+        factory:    ['Symfony\Component\Ldap\Ldap', 'create']
+        arguments:
+            - 'ext_ldap'
+            - { host: "%ldap_domain%", port: "%ldap_port%", encryption: 'none', referrals: false, version: '3', debug: true }
+
     kuleuven_authentication.service.ldap:
         class:      "%kuleuven_authentication.service.ldap.class%"
         arguments:
+            - "@kuleuven_authentication.service._ldap"
             - "%ldap_rdn%"
             - "%ldap_password%"
             - "%ldap_base%"
-            - "%ldap_domain%"
-            - "%ldap_port%"
 
     kuleuven_authentication.service.ldap_attributes_provider:
         class: "%kuleuven_authentication.service.ldap_attributes_provider.class%"
