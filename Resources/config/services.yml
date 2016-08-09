@@ -180,7 +180,7 @@ services:
         factory:    ['Symfony\Component\Ldap\Ldap', 'create']
         arguments:
             - 'ext_ldap'
-            - { host: "%ldap_domain%", port: "%ldap_port%", encryption: '%ldap_encrytion%', referrals: '%ldap_referrals%', version: '%ldap_version%', debug: '%ldap_debug%' }
+            - { host: "%ldap_domain%", port: "%ldap_port%", encryption: '%ldap_encryption%', referrals: '%ldap_referrals%', version: '%ldap_version%', debug: '%ldap_debug%' }
 
     kuleuven_authentication.service.ldap:
         class:      "%kuleuven_authentication.service.ldap.class%"
