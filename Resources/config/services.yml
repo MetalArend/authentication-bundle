@@ -22,7 +22,6 @@ parameters:
 
     # LDAP
 
-    kuleuven_authentication.controller.ldap.class: 'Kuleuven\AuthenticationBundle\Controller\LdapController'
     kuleuven_authentication.service.ldap.class: 'Kuleuven\AuthenticationBundle\Service\LdapService'
     kuleuven_authentication.service.ldap_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider'
     kuleuven_authentication.service.ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapUserProvider'
@@ -174,12 +173,6 @@ services:
             - { name: monolog.logger, channel: security }
 
     # LDAP
-
-    kuleuven_authentication.controller.ldap:
-        class:      "%kuleuven_authentication.controller.ldap.class%"
-        arguments:
-            - "@kuleuven_authentication.service.ldap"
-            - "%kernel.debug%"
 
     kuleuven_authentication.service.ldap:
         class:      "%kuleuven_authentication.service.ldap.class%"
