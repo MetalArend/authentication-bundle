@@ -68,8 +68,6 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
 
         // Get attributes
         $hash = 'kuleuven-authentication-ldap-results-' . md5(serialize($filter));
-        /** @var Entry[] $ldapArrayResults */
-        $ldapArrayResults = null;
         if (!empty($this->session) && $this->session->has($hash)) {
             // Retrieve from the session (cache)
             $attributes = $this->session->get($hash);
@@ -81,6 +79,7 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
                 return [];
             }
             // Get the first result
+            /** @var Entry $ldapSingleResult */
             $ldapSingleResult = $ldapResults->toArray()['0'];
             // Extract attributes as strings
             $attributes = $ldapSingleResult->getAttributes();
