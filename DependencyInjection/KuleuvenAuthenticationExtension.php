@@ -82,6 +82,10 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
         $container->setParameter('ldap_base', $config['ldap_base']);
         $container->setParameter('ldap_domain', $config['ldap_domain']);
         $container->setParameter('ldap_port', $config['ldap_port']);
+        $container->setParameter('ldap_encryption', $config['ldap_encryption']);
+        $container->setParameter('ldap_referrals', $config['ldap_referrals']);
+        $container->setParameter('ldap_version', $config['ldap_version']);
+        $container->setParameter('ldap_debug', $config['ldap_debug']);
 
         // Person Data API
         $container->setParameter('person_data_api_url', $config['person_data_api_url']);

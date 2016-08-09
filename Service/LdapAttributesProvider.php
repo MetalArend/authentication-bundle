@@ -3,6 +3,7 @@
 namespace Kuleuven\AuthenticationBundle\Service;
 
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Ldap\Entry;
 
 class LdapAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
 {
@@ -56,60 +57,51 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
 
     /**
      * @param array $filter
-     * @param array $attributes
-     * @param int   $limit
      * @return array
-     * @throws \Exception
      */
-    public function getAttributesByFilter(array $filter, array $attributes = [], $limit = 1)
+    public function getAttributesByFilter(array $filter)
     {
+        // Return early if filter is empty
         if (empty($filter)) {
             return [];
         }
 
-        // Retrieve from the session (cache)
-        $hash = 'shibboleth-authentication-' . md5(serialize($filter) . '-' . serialize($attributes) . '-' . $limit);
+        // Get attributes
+        $hash = 'kuleuven-authentication-ldap-results-' . md5(serialize($filter));
+        /** @var Entry[] $ldapArrayResults */
+        $ldapArrayResults = null;
         if (!empty($this->session) && $this->session->has($hash)) {
-            $ldapResults = $this->session->get($hash);
+            // Retrieve from the session (cache)
+            $attributes = $this->session->get($hash);
         } else {
-            $ldapResults = $this->ldapService->search($filter, $attributes, $limit, false);
-            if (!empty($this->session) && isset($ldapResults['count']) && 0 !== $ldapResults['count']) {
-                // Save to the cache
-                $this->session->set($hash, $ldapResults);
+            // Search LDAP
+            $ldapResults = $this->ldapService->search($filter);
+            // Return empty array if filter returns more than one user
+            if (1 !== $ldapResults->count()) {
+                return [];
+            }
+            // Get the first result
+            $ldapSingleResult = $ldapResults->toArray()['0'];
+            // Extract attributes as strings
+            $attributes = $ldapSingleResult->getAttributes();
+            array_walk($attributes, function (&$value) {
+                $value = (is_array($value) ? implode(';', $value) : $value);
+            });
+            // Save to the session (cache)
+            if (!empty($this->session)) {
+                $this->session->set($hash, $attributes);
             }
         }
 
-        if (0 === $ldapResults['count']) {
-            return [];
-        }
-
-        $ldapResult = $ldapResults['0'];
-
-        $attributes = [];
-        for ($i = 0; $i < $ldapResult['count']; $i++) {
-            $name = $ldapResult[$i];
-            if (1 === $ldapResult[$name]['count']) {
-                $value = $ldapResult[$name][0];
-            } else {
-                $value = [];
-                for ($j = 0; $j < $ldapResult[$name]['count']; $j++) {
-                    $value[] = $ldapResult[$name][$j];
-                }
-                $value = implode(';', $value);
-            }
-            $attributes[$name] = $value;
-        }
-
+        // Return attributes
         return $attributes;
     }
 
     /**
-     * @param array $attributes
-     * @param int   $limit
      * @return array
      */
-    public function getAttributes(array $attributes = [], $limit = 1)
+    public function getAttributes()
     {
-        return $this->getAttributesByFilter($this->filter, $attributes, $limit);
+        return $this->getAttributesByFilter($this->filter);
     }
 }

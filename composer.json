@@ -27,6 +27,7 @@
     "symfony/security-bundle": "^3.1",
     "symfony/event-dispatcher": "^3.1",
     "symfony/dom-crawler": "^3.1",
+    "symfony/ldap": "^3.1",
     "psr/log": "*"
   },
   "autoload": {

@@ -27,7 +27,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->children()
                             ->scalarNode('id')->isRequired()->end()
-                            ->booleanNode('multivalue')->defaultValue(false)->end()
+                            ->booleanNode('multivalue')->defaultFalse()->end()
                             ->scalarNode('charset')->defaultValue('UTF-8')->end()
                         ->end()
                     ->end()
@@ -66,7 +66,11 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('ldap_base')->defaultValue('ou=people,dc=kuleuven,dc=be')->end()
                 ->scalarNode('ldap_domain')->defaultValue('ldap.kuleuven.be')->cannotBeEmpty()->end()
                 ->scalarNode('ldap_port')->defaultValue('389')->end()
-            
+                ->enumNode('ldap_encryption')->values('none', 'ssl', 'tls')->defaultValue('none')->end()
+                ->booleanNode('ldap_referrals')->defaultFalse()->end()
+                ->booleanNode('ldap_version')->defaultValue('3')->end()
+                ->booleanNode('ldap_debug')->defaultFalse()->end()
+
                 // Person Data API
                 ->scalarNode('person_data_api_url')->defaultValue('https://webwsp.aps.kuleuven.be/esap/public/odata/sap/zh_person_srv/Persons(\'%s\')?$format=json&$expand=WorkAddresses')->end()
             

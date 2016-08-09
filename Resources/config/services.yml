@@ -22,7 +22,6 @@ parameters:
 
     # LDAP
 
-    kuleuven_authentication.controller.ldap.class: 'Kuleuven\AuthenticationBundle\Controller\LdapController'
     kuleuven_authentication.service.ldap.class: 'Kuleuven\AuthenticationBundle\Service\LdapService'
     kuleuven_authentication.service.ldap_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider'
     kuleuven_authentication.service.ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapUserProvider'
@@ -175,20 +174,21 @@ services:
 
     # LDAP
 
-    kuleuven_authentication.controller.ldap:
-        class:      "%kuleuven_authentication.controller.ldap.class%"
+    kuleuven_authentication.service._ldap:
+        public:     false
+        class:      'Symfony\Component\Ldap\Ldap'
+        factory:    ['Symfony\Component\Ldap\Ldap', 'create']
         arguments:
-            - "@kuleuven_authentication.service.ldap"
-            - "%kernel.debug%"
+            - 'ext_ldap'
+            - { host: "%ldap_domain%", port: "%ldap_port%", encryption: '%ldap_encrytion%', referrals: '%ldap_referrals%', version: '%ldap_version%', debug: '%ldap_debug%' }
 
     kuleuven_authentication.service.ldap:
         class:      "%kuleuven_authentication.service.ldap.class%"
         arguments:
+            - "@kuleuven_authentication.service._ldap"
             - "%ldap_rdn%"
             - "%ldap_password%"
             - "%ldap_base%"
-            - "%ldap_domain%"
-            - "%ldap_port%"
 
     kuleuven_authentication.service.ldap_attributes_provider:
         class: "%kuleuven_authentication.service.ldap_attributes_provider.class%"
