@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
             ->fixXmlConfig('attribute_definition')
             ->fixXmlConfig('overwrite')
             ->children()
-            
+
                 // Authentication
                 ->arrayNode('authentication_attribute_definitions')
                     ->useAttributeAsKey('alias')
@@ -45,6 +45,12 @@ class Configuration implements ConfigurationInterface
                     ->normalizeKeys(false)
                     ->prototype('scalar')->end()
                     ->defaultValue([])
+                ->end()
+                ->arrayNode('authentication_attribute_requirements')
+                    ->useAttributeAsKey('name')
+                    ->normalizeKeys(false)
+                    ->prototype('scalar')->end()
+                    ->defaultValue(['Shib-Identity-Provider' => 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'])
                 ->end()
 
                 // Shibboleth
@@ -73,7 +79,7 @@ class Configuration implements ConfigurationInterface
 
                 // Person Data API
                 ->scalarNode('person_data_api_url')->defaultValue('https://webwsp.aps.kuleuven.be/esap/public/odata/sap/zh_person_srv/Persons(\'%s\')?$format=json&$expand=WorkAddresses')->end()
-            
+
             ->end();
 
         return $treeBuilder;

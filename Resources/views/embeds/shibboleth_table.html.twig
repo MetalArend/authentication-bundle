@@ -86,6 +86,17 @@
         <td>{{ shibboleth.logoutUrlAttribute }}</td>
     </tr>
     <tr>
+        <th>
+            <nobr>Authentication requirements</nobr>
+        </th>
+        <td>
+            {% for name, value in shibboleth.authenticationRequirements %}
+                {{ name }}: <em>{{ value }}</em>
+                {% if not loop.last %}<br/>{% endif %}
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
         <th>Default charset</th>
         <td>{{ shibboleth.defaultCharset }}</td>
     </tr>

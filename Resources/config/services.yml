@@ -121,6 +121,7 @@ services:
             - "%shibboleth_username_attribute%"
             - "%shibboleth_authenticated_attribute%"
             - "%shibboleth_logout_url_attribute%"
+            - "%authentication_attribute_requirements%"
             - "%shibboleth_default_charset%"
 
     kuleuven_authentication.security.authentication.entry_point:
@@ -243,8 +244,7 @@ services:
             - "@session"
             - "@security.token_storage"
             - "@kuleuven_authentication.service.shibboleth_service_provider"
-            - "@security.authentication.manager"
-            - ""
+            - "kuleuven_authentication"
         calls:
             - [setLogger, ["@?logger"]]
         tags:

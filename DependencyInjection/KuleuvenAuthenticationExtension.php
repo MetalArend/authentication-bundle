@@ -48,12 +48,19 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
         } elseif (!$container->hasParameter('authentication_attribute_definitions')) {
             $container->setParameter('authentication_attribute_definitions', []);
         }
+
+        // Attribute requirements
+        $container->setParameter('authentication_attribute_requirements', $config['authentication_attribute_requirements']);
+
+        // Attribute overwrites
         $container->setParameter('authentication_attribute_overwrites_enabled', $config['authentication_attribute_overwrites_enabled']);
         if (isset($config['authentication_attribute_overwrites'])) {
             $container->setParameter('authentication_attribute_overwrites', $config['authentication_attribute_overwrites']);
         } elseif (!$container->hasParameter('authentication_attribute_overwrites')) {
             $container->setParameter('authentication_attribute_overwrites', []);
         }
+
+        // Attribute LDAP overwrites
         $container->setParameter('authentication_attribute_ldap_enabled', $config['authentication_attribute_ldap_enabled']);
         $container->setParameter('authentication_attribute_ldap_filter', $config['authentication_attribute_ldap_filter']);
 
