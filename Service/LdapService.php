@@ -79,6 +79,6 @@ class LdapService
         if (is_array($filter)) {
             $filter = $this->createFilter($filter, '&', '*%s*');
         }
-        $this->search($filter, $attributes, $attrsOnly, $sizeLimit, $timeLimit);
+        return $this->search($filter, $attributes, $attrsOnly, $sizeLimit, $timeLimit);
     }
 }
