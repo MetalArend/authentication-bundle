@@ -407,6 +407,8 @@ Check if you are behind a certain firewall with the FirewallHelper service.
 Upcoming
 ========
 
+- TODO Add KuleuvenSwitchUserToken
+- TODO ShibbolethSwitchUserPersistenceSubscriber should authenticate token in onKernelRequest with ShibbolethAuthenticationProvider
 - TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
 - TODO Check if the Shib-Handler attribute is present, and give notice if it is different than the configuration
 - TODO Add the expected identity-provider value, and check for it on production (and use it locally as an overwrite?)
