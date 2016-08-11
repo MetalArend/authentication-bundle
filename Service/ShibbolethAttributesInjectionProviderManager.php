@@ -8,14 +8,14 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 class ShibbolethAttributesInjectionProviderManager
 {
     /**
-     * @var AttributesProviderInterface[]|ArrayCollection
-     */
-    protected $providerPropertiesCollection;
-
-    /**
      * @var AttributeDefinitionsProviderInterface
      */
     protected $attributeDefinitionsProvider;
+
+    /**
+     * @var AttributesInjectionProviderInterface[]|ArrayCollection
+     */
+    protected $providerPropertiesCollection;
 
     /**
      * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider

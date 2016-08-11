@@ -90,7 +90,7 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
         $this->log(sprintf('Shibboleth attributes found: %s', json_encode($attributes)));
 
         if (!$this->shibbolethServiceProvider->isAuthenticated()) {
-            $this->log('Shibboleth Service Provider not authenticated');
+            $this->log('Shibboleth has not authenticated your request.');
             return;
         }
 

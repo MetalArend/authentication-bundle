@@ -5,7 +5,7 @@ namespace Kuleuven\AuthenticationBundle\Service;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class ShibbolethServiceProvider implements AttributesProviderInterface
+class ShibbolethServiceProvider implements AttributesByUsernameProviderInterface
 {
     /**
      * @var RequestStack
@@ -270,6 +270,19 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     public function getUsername()
     {
         return $this->getAttribute($this->usernameAttribute);
+    }
+
+    /**
+     * @param $username
+     * @return array
+     */
+    public function getAttributesByUsername($username)
+    {
+        if ($username !== $this->getUsername()) {
+            return [];
+        }
+
+        return $this->getAttributes(null);
     }
 
     /**

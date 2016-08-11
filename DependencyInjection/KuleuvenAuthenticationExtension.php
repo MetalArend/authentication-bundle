@@ -9,7 +9,6 @@ use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListener;
 use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListenerFactory;
 use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationProvider;
 use Kuleuven\AuthenticationBundle\Service\LdapService;
-use Kuleuven\AuthenticationBundle\Service\LdapUserProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,7 +33,6 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
             ShibbolethServiceProvider::class,
             ShibbolethUserProvider::class,
             LdapService::class,
-            LdapUserProvider::class,
             KuleuvenUserToken::class,
             KuleuvenUser::class,
         ]);

@@ -24,7 +24,7 @@ parameters:
 
     kuleuven_authentication.service.ldap.class: 'Kuleuven\AuthenticationBundle\Service\LdapService'
     kuleuven_authentication.service.ldap_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider'
-    kuleuven_authentication.service.ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapUserProvider'
+    kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider'
 
     # Person Data API
 
@@ -202,8 +202,15 @@ services:
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
-    kuleuven_authentication.service.ldap_user_provider:
-        class: "%kuleuven_authentication.service.ldap_user_provider.class%"
+    kuleuven_authentication.service.ldap_user_provider: # deprecated
+        class: "%kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class%"
+        arguments:
+            - "@kuleuven_authentication.service.ldap_attributes_provider"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
+        deprecated: ~
+
+    kuleuven_authentication.service.shibboleth_via_ldap_user_provider:
+        class: "%kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class%"
         arguments:
             - "@kuleuven_authentication.service.ldap_attributes_provider"
             - "@kuleuven_authentication.service.attribute_definitions_provider"

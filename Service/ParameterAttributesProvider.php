@@ -2,7 +2,7 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-class ParameterAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
+class ParameterAttributesProvider implements AttributesInjectionProviderInterface
 {
     /**
      * @var array

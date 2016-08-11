@@ -12,9 +12,9 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class ShibbolethUserProvider implements UserProviderInterface
 {
     /**
-     * @var ShibbolethServiceProvider
+     * @var AttributesByUsernameProviderInterface
      */
-    protected $shibbolethServiceProvider;
+    protected $attributesProvider;
 
     /**
      * @var AttributeDefinitionsProviderInterface
@@ -22,12 +22,12 @@ class ShibbolethUserProvider implements UserProviderInterface
     protected $attributeDefinitionsProvider;
 
     /**
-     * @param ShibbolethServiceProvider             $shibbolethServiceProvider
+     * @param AttributesByUsernameProviderInterface $attributesProvider
      * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider
      */
-    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, AttributeDefinitionsProviderInterface $attributeDefinitionsProvider)
+    public function __construct(AttributesByUsernameProviderInterface $attributesProvider, AttributeDefinitionsProviderInterface $attributeDefinitionsProvider)
     {
-        $this->shibbolethServiceProvider = $shibbolethServiceProvider;
+        $this->attributesProvider = $attributesProvider;
         $this->attributeDefinitionsProvider = $attributeDefinitionsProvider;
     }
 
@@ -36,26 +36,37 @@ class ShibbolethUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        if (!$this->shibbolethServiceProvider->isAuthenticated()) {
-            throw new UsernameNotFoundException(sprintf('Username %s not found', $username));
-        }
-        if ($this->shibbolethServiceProvider->getUsername() !== $username) {
-            throw new UsernameNotFoundException(sprintf('User %s is not authenticated by Shibboleth.', $username));
+        $providerAttributes = $this->attributesProvider->getAttributesByUsername($username);
+        if (empty($providerAttributes)) {
+            throw new UsernameNotFoundException(sprintf('User "%s" not found.', $username));
         }
 
         $attributeDefinitions = $this->attributeDefinitionsProvider->getAttributeDefinitions();
-        $attributes = $this->shibbolethServiceProvider->getAttributes();
-        foreach ($attributes as $name => &$value) {
-            if (!isset($attributeDefinitions[$name])) {
-                continue;
+        $attributes = [];
+        foreach ($attributeDefinitions as $idOrAlias => $attributeDefinition) {
+            $value = null;
+            switch (true) {
+                case isset($providerAttributes[$idOrAlias]):
+                    $value = $providerAttributes[$idOrAlias];
+                    break;
+                case isset($providerAttributes[strtolower($idOrAlias)]):
+                    $value = $providerAttributes[strtolower($idOrAlias)];
+                    break;
+                default:
+                    continue 2; // switch is considered a looping structure, we have to continue the foreach
             }
-            $attributeDefinition = $attributeDefinitions[$name];
             $charset = isset($attributeDefinition['charset']) ? $attributeDefinition['charset'] : 'UTF-8';
             if ($charset == 'UTF-8') {
                 $value = utf8_decode($value);
             }
             if (isset($attributeDefinition['multivalue']) && $attributeDefinition['multivalue']) {
                 $value = explode(';', $value); // $value is an array
+            }
+            $id = $attributeDefinition['id'];
+            $aliases = $attributeDefinition['aliases'];
+            $attributes[$id] = $value;
+            foreach ($aliases as $alias) {
+                $attributes[$alias] = $value;
             }
         }
 
@@ -74,11 +85,13 @@ class ShibbolethUserProvider implements UserProviderInterface
             throw new UnsupportedUserException(sprintf('Class "%s" should implement "%s".', get_class($user), KuleuvenUserInterface::class));
         }
 
-        if ($this->shibbolethServiceProvider->getUsername() !== $user->getUsername()) {
-            throw new UnsupportedUserException(sprintf('User "%s" is not authenticated by Shibboleth.', $user->getUsername()));
+        try {
+            $user = $this->loadUserByUsername($user->getUsername());
+        } catch (UsernameNotFoundException $exception) {
+            throw new UnsupportedUserException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        return $this->loadUserByUsername($user->getUsername());
+        return $user;
     }
 
     /**

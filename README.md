@@ -355,11 +355,11 @@ security:
     providers:
        chain_provider:
             chain:
-                providers: [kuleuven_authentication.service.shibboleth_user_provider, kuleuven_authentication.service.ldap_user_provider]
-        kuleuven_authentication.service.ldap_user_provider:
-            id: kuleuven_authentication.service.ldap_user_provider
+                providers: [kuleuven_authentication.service.shibboleth_user_provider, kuleuven_authentication.service.shibboleth_via_ldap_user_provider]
         kuleuven_authentication.service.shibboleth_user_provider:
             id: kuleuven_authentication.service.shibboleth_user_provider 
+        kuleuven_authentication.service.shibboleth_via_ldap_user_provider:
+            id: kuleuven_authentication.service.shibboleth_via_ldap_user_provider
     ...
     firewalls:
         ...

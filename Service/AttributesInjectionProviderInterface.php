@@ -2,7 +2,9 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-interface AttributesInjectionProviderInterface extends AttributesProviderInterface
+interface AttributesInjectionProviderInterface
 {
     public function isEnabled();
+
+    public function getAttributes();
 }
