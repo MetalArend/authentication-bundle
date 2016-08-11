@@ -416,7 +416,7 @@ Upcoming
 - TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
 - TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
 - TODO Make it possible to extend vs overwrite the attribute definitions (extra parameter?)
-- TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesProviderInterface
+- TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesInjectionProviderInterface
 - TODO provide examples: how to add an automatic user save on visit
 - TODO Add providerKey in token support checks
 - TODO Implement LoggerAware in some extra classes
