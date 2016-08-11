@@ -52,8 +52,8 @@ services:
     kuleuven_authentication.service.attribute_definitions_provider:
         class: "%kuleuven_authentication.service.attribute_definitions_provider.class%"
         arguments:
-            - "@kernel"
             - "%authentication_attribute_definitions%"
+            - "%kuleuven_shibboleth_attribute_definitions%"
 
     kuleuven_authentication.service.parameter_attributes_provider:
         class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
