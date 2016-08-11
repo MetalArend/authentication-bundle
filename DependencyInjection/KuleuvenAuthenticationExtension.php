@@ -62,6 +62,9 @@ class KuleuvenAuthenticationExtension extends Extension implements ExtensionInte
         $container->setParameter('authentication_attribute_ldap_enabled', $config['authentication_attribute_ldap_enabled']);
         $container->setParameter('authentication_attribute_ldap_filter', $config['authentication_attribute_ldap_filter']);
 
+        // Attribute header overwrites
+        $container->setParameter('authentication_attribute_headers_enabled', $config['authentication_attribute_headers_enabled']);
+
         // Shibboleth
         $container->setParameter('shibboleth_is_secured_handler', $config['shibboleth_is_secured_handler']);
         $container->setParameter('shibboleth_handler_path', $config['shibboleth_handler_path']);

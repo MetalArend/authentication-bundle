@@ -35,6 +35,9 @@ class ShibbolethAttributesInjectionProviderManager
         if ($provider instanceof ParameterAttributesProvider && 0 === $priority) {
             $priority = -INF;
         }
+        if ($provider instanceof HeaderAttributesProvider && 0 === $priority) {
+            $priority = -INF;
+        }
         $this->providerPropertiesCollection->add(['priority' => $priority, 'provider' => $provider]);
     }
 

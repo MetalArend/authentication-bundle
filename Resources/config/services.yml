@@ -6,6 +6,7 @@ parameters:
     kuleuven_authentication.controller.security.class: 'Kuleuven\AuthenticationBundle\Controller\SecurityController'
     kuleuven_authentication.service.attribute_definitions_provider.class: 'Kuleuven\AuthenticationBundle\Service\AttributeDefinitionsProvider'
     kuleuven_authentication.service.parameter_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider'
+    kuleuven_authentication.service.header_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\HeaderAttributesProvider'
     kuleuven_authentication.service.firewall_helper.class: 'Kuleuven\AuthenticationBundle\Service\FirewallHelper'
     twig.extension.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Twig\ShibbolethExtension'
     data_collector.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Collector\AuthenticationDataCollector'
@@ -60,6 +61,14 @@ services:
         arguments:
             - "%authentication_attribute_overwrites%"
             - "%authentication_attribute_overwrites_enabled%"
+        tags:
+            - { name: kuleuven_authentication.shibboleth_attributes_injector }
+
+    kuleuven_authentication.service.header_attributes_provider:
+        class: "%kuleuven_authentication.service.header_attributes_provider.class%"
+        arguments:
+            - "@request_stack"
+            - "%authentication_attribute_headers_enabled%"
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
