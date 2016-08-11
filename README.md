@@ -410,18 +410,15 @@ Upcoming
 - TODO Add KuleuvenSwitchUserToken
 - TODO ShibbolethSwitchUserPersistenceSubscriber should authenticate token in onKernelRequest with ShibbolethAuthenticationProvider
 - TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
-- TODO Check if the Shib-Handler attribute is present, and give notice if it is different than the configuration
-- TODO Add the expected identity-provider value, and check for it on production (and use it locally as an overwrite?)
 - TODO Send notice if LDAP filter returns more than 1 user
 - TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
 - TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
-- TODO Make it possible to extend vs overwrite the attribute definitions (extra parameter?)
 - TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesInjectionProviderInterface
 - TODO provide examples: how to add an automatic user save on visit
 - TODO Add providerKey in token support checks
 - TODO Implement LoggerAware in some extra classes
+- TODO Use one central proxy logger for the authentication bundle
 - TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
-- TODO Implement ldap.jquery.js
 - TODO Activate Person Data API
 - TODO Instead of overwriting the switchuser_listener, add a new Security Factory
 - TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
