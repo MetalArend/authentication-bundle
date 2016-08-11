@@ -2,8 +2,6 @@
 
 namespace Kuleuven\AuthenticationBundle\Service;
 
-use Symfony\Component\HttpKernel\KernelInterface;
-
 class AttributeDefinitionsProvider implements AttributeDefinitionsProviderInterface
 {
     /**
