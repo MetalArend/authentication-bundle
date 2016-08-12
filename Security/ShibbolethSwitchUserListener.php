@@ -82,7 +82,6 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
                 if (false === $originalToken) {
                     $this->log('Exit attempt ignored, no original token found');
                 } else {
-                    $this->log(sprintf('Original token found: %s', $originalToken));
                     $authenticationToken = $this->attemptSwitchUser($request, $originalToken->getUsername());
                     $this->log(sprintf('Switch to new authentication token: %s', $authenticationToken));
                     $this->tokenStorage->setToken($authenticationToken);
@@ -94,7 +93,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
                     $this->tokenStorage->setToken($authenticationToken);
                 } catch (AuthenticationException $e) {
                     $this->log(sprintf('Switch User failed: "%s"', $e->getMessage()));
-                    throw new \LogicException(sprintf('Switch User failed: "%s"', $e->getMessage()));
+                    throw $e;
                 }
             }
         }
@@ -131,7 +130,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
             // User is impersonating someone, they are trying to switch directly to another user, make sure original user has access.
             if (false === $this->accessDecisionManager->decide($originalToken, [$this->role])) {
                 $this->log(sprintf('Original token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
-                throw new AccessDeniedException();
+                throw new AccessDeniedException(sprintf('Original token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
             }
             if ($originalToken->getUsername() === $username) {
                 $this->log(sprintf('Original token is already for "%s", switching to original token: %s', $username, $originalToken));
@@ -143,7 +142,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
             }
         } elseif (false === $this->accessDecisionManager->decide($token, [$this->role])) {
             $this->log(sprintf('Token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
-            throw new AccessDeniedException();
+            throw new AccessDeniedException(sprintf('Token has no right to impersonate "%s", access denied: %s', $username, $originalToken));
         }
 
         $this->log(sprintf('Attempting to impersonate "%s"', $username));

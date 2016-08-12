@@ -5,7 +5,7 @@ namespace Kuleuven\AuthenticationBundle\Service;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class ShibbolethServiceProvider implements AttributesProviderInterface
+class ShibbolethServiceProvider implements AttributesByUsernameProviderInterface
 {
     /**
      * @var RequestStack
@@ -63,6 +63,11 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     protected $logoutUrlAttribute;
 
     /**
+     * @var array
+     */
+    protected $authenticationRequirements;
+
+    /**
      * @var string
      */
     protected $defaultCharset;
@@ -71,6 +76,11 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
      * @var Request
      */
     protected $request;
+
+    /**
+     * @var bool
+     */
+    protected $authenticated;
 
     /**
      * @param RequestStack                          $requestStack
@@ -82,8 +92,8 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
      * @param string                                $sessionLogoutPath
      * @param string                                $sessionOverviewPath
      * @param string                                $usernameAttribute
-     * @param string                                $authenticatedAttribute
      * @param string                                $logoutUrlAttribute
+     * @param array                                 $authenticationRequirements
      * @param string                                $defaultCharset
      */
     public function __construct(
@@ -98,6 +108,7 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $usernameAttribute,
         $authenticatedAttribute,
         $logoutUrlAttribute,
+        $authenticationRequirements,
         $defaultCharset
     )
     {
@@ -112,6 +123,7 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
         $this->usernameAttribute = $usernameAttribute;
         $this->authenticatedAttribute = $authenticatedAttribute;
         $this->logoutUrlAttribute = $logoutUrlAttribute;
+        $this->authenticationRequirements = $authenticationRequirements;
         $this->defaultCharset = $defaultCharset;
 
         return $this;
@@ -203,11 +215,53 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     }
 
     /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasAttribute($name)
+    {
+        $empty = microtime(true);
+        return $empty !== $this->getAttribute($name, $empty);
+    }
+
+    /**
+     * @param array $keyValues
+     * @return bool
+     */
+    public function hasAttributeValues(array $keyValues)
+    {
+        $result = true;
+        $empty = microtime(true);
+        set_error_handler(function ($errno, $errstr) {
+            throw new \Exception($errstr, $errno);
+        });
+        foreach ($keyValues as $checkName => $checkValue) {
+            $value = $this->getAttribute($checkName, $empty);
+            if ($checkValue !== $value) {
+                try {
+                    $result = preg_match($checkValue, $value);
+                } catch (\Exception $e) {
+                    $result = false;
+                }
+            }
+            if (!$result) {
+                break;
+            }
+        }
+        restore_error_handler();
+        return $result;
+    }
+
+    /**
      * @return bool
      */
     public function isAuthenticated()
     {
-        return null !== $this->getAttribute($this->authenticatedAttribute, null);
+        if (null === $this->authenticated) {
+            $this->authenticated = $this->hasAttributeValues($this->getAuthenticationRequirements());
+        }
+
+        return $this->authenticated;
     }
 
     /**
@@ -216,6 +270,19 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     public function getUsername()
     {
         return $this->getAttribute($this->usernameAttribute);
+    }
+
+    /**
+     * @param $username
+     * @return array
+     */
+    public function getAttributesByUsername($username)
+    {
+        if ($username !== $this->getUsername()) {
+            return [];
+        }
+
+        return $this->getAttributes(null);
     }
 
     /**
@@ -316,6 +383,14 @@ class ShibbolethServiceProvider implements AttributesProviderInterface
     public function getLogoutUrlAttribute()
     {
         return $this->logoutUrlAttribute;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthenticationRequirements()
+    {
+        return $this->authenticationRequirements;
     }
 
     /**

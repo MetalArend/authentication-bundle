@@ -33,7 +33,11 @@ class LdapService
         $string = '';
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $string .= $this->createFilter($value, $key, $format);
+                if (0 === count(array_filter(array_keys($value), 'is_numeric'))) {
+                    $string .= $this->createFilter($value, $key, $format);
+                } else {
+                    $string .= '(|(' . $key . '=' . implode(')(' . $key . '=', $value) . '))';
+                }
             } else {
                 $value = sprintf($format, $value);
                 $string .= "(${key}=${value})";
@@ -75,6 +79,6 @@ class LdapService
         if (is_array($filter)) {
             $filter = $this->createFilter($filter, '&', '*%s*');
         }
-        $this->search($filter, $attributes, $attrsOnly, $sizeLimit, $timeLimit);
+        return $this->search($filter, $attributes, $attrsOnly, $sizeLimit, $timeLimit);
     }
 }

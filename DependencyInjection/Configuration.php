@@ -20,8 +20,8 @@ class Configuration implements ConfigurationInterface
             ->fixXmlConfig('attribute_definition')
             ->fixXmlConfig('overwrite')
             ->children()
-            
-                // Authentication
+
+                // Attribute definitions
                 ->arrayNode('authentication_attribute_definitions')
                     ->useAttributeAsKey('alias')
                     ->prototype('array')
@@ -32,6 +32,16 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+
+                // Attribute requirements
+                ->arrayNode('authentication_attribute_requirements')
+                    ->useAttributeAsKey('name')
+                    ->normalizeKeys(false)
+                    ->prototype('scalar')->end()
+                    ->defaultValue(['Shib-Identity-Provider' => 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'])
+                ->end()
+
+                // Attribute overwrites
                 ->booleanNode('authentication_attribute_overwrites_enabled')->defaultFalse()->end()
                 ->arrayNode('authentication_attribute_overwrites')
                     ->useAttributeAsKey('id')
@@ -39,6 +49,8 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                     ->defaultValue([])
                 ->end()
+
+                // Attribute LDAP overwrites
                 ->booleanNode('authentication_attribute_ldap_enabled')->defaultFalse()->end()
                 ->arrayNode('authentication_attribute_ldap_filter')
                     ->useAttributeAsKey('id')
@@ -46,6 +58,9 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                     ->defaultValue([])
                 ->end()
+
+                // Attribute header overwrites
+                ->booleanNode('authentication_attribute_headers_enabled')->defaultFalse()->end()
 
                 // Shibboleth
                 ->booleanNode('shibboleth_is_secured_handler')->defaultTrue()->end()
@@ -73,7 +88,7 @@ class Configuration implements ConfigurationInterface
 
                 // Person Data API
                 ->scalarNode('person_data_api_url')->defaultValue('https://webwsp.aps.kuleuven.be/esap/public/odata/sap/zh_person_srv/Persons(\'%s\')?$format=json&$expand=WorkAddresses')->end()
-            
+
             ->end();
 
         return $treeBuilder;

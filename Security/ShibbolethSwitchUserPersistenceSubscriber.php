@@ -9,7 +9,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
@@ -22,7 +21,6 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
     protected $session;
     protected $tokenStorage;
     protected $shibbolethServiceProvider;
-    protected $authenticationManager;
     protected $userProvider;
     protected $userChecker;
     protected $accessDecisionManager;
@@ -35,14 +33,12 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
         SessionInterface $session,
         TokenStorageInterface $tokenStorage,
         ShibbolethServiceProvider $shibbolethServiceProvider,
-        AuthenticationManagerInterface $authenticationManager,
-        $sessionKey = 'authentication'
+        $sessionKey
     )
     {
         $this->session = $session;
         $this->tokenStorage = $tokenStorage;
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
-        $this->authenticationManager = $authenticationManager;
         $this->sessionKey = $sessionKey;
     }
 
@@ -56,16 +52,20 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
 
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $token = $this->session->get($this->sessionKey);
-        if (empty($token) || !$this->supportsToken($token)) {
+        $token = $this->tokenStorage->getToken();
+        if (!empty($token)) {
             return null;
         }
-        $this->log(sprintf('Persisted token found: %s', $token));
 
-        $token = $this->authenticationManager->authenticate($token);
-        $this->tokenStorage->setToken($token);
+        $persistedToken = $this->session->get($this->sessionKey);
+        if (empty($persistedToken) || !$this->supportsToken($persistedToken)) {
+            return null;
+        }
 
-        return $token;
+        $this->log(sprintf('Token found in session: %s', $persistedToken));
+
+        $this->tokenStorage->setToken($persistedToken);
+        $this->log(sprintf('Token written to storage: %s', $persistedToken));
     }
 
     public function onUserSwitch(SwitchUserEvent $event)
@@ -73,10 +73,10 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
         if ($event instanceof ShibbolethSwitchUserEvent) {
             if ($event->getTargetUser()->getUsername() !== $this->shibbolethServiceProvider->getUsername()) {
                 $this->session->set($this->sessionKey, $event->getToken());
-                $this->log(sprintf('Token persisted for username "%s": %s', $event->getTargetUser()->getUsername(), $event->getToken()));
+                $this->log(sprintf('Token persisted in session for username "%s": %s', $event->getTargetUser()->getUsername(), $event->getToken()));
             } else {
                 $this->session->remove($this->sessionKey);
-                $this->log(sprintf('Persisted token cleared: %s', $event->getToken()));
+                $this->log(sprintf('Token removed from session: %s', $event->getToken()));
             }
         }
     }

@@ -6,6 +6,7 @@ parameters:
     kuleuven_authentication.controller.security.class: 'Kuleuven\AuthenticationBundle\Controller\SecurityController'
     kuleuven_authentication.service.attribute_definitions_provider.class: 'Kuleuven\AuthenticationBundle\Service\AttributeDefinitionsProvider'
     kuleuven_authentication.service.parameter_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider'
+    kuleuven_authentication.service.header_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\HeaderAttributesProvider'
     kuleuven_authentication.service.firewall_helper.class: 'Kuleuven\AuthenticationBundle\Service\FirewallHelper'
     twig.extension.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Twig\ShibbolethExtension'
     data_collector.kuleuven_authentication.class: 'Kuleuven\AuthenticationBundle\Collector\AuthenticationDataCollector'
@@ -24,7 +25,7 @@ parameters:
 
     kuleuven_authentication.service.ldap.class: 'Kuleuven\AuthenticationBundle\Service\LdapService'
     kuleuven_authentication.service.ldap_attributes_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider'
-    kuleuven_authentication.service.ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\LdapUserProvider'
+    kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class: 'Kuleuven\AuthenticationBundle\Service\ShibbolethUserProvider'
 
     # Person Data API
 
@@ -52,14 +53,22 @@ services:
     kuleuven_authentication.service.attribute_definitions_provider:
         class: "%kuleuven_authentication.service.attribute_definitions_provider.class%"
         arguments:
-            - "@kernel"
             - "%authentication_attribute_definitions%"
+            - "%kuleuven_shibboleth_attribute_definitions%"
 
     kuleuven_authentication.service.parameter_attributes_provider:
         class: "%kuleuven_authentication.service.parameter_attributes_provider.class%"
         arguments:
             - "%authentication_attribute_overwrites%"
             - "%authentication_attribute_overwrites_enabled%"
+        tags:
+            - { name: kuleuven_authentication.shibboleth_attributes_injector }
+
+    kuleuven_authentication.service.header_attributes_provider:
+        class: "%kuleuven_authentication.service.header_attributes_provider.class%"
+        arguments:
+            - "@request_stack"
+            - "%authentication_attribute_headers_enabled%"
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
@@ -82,9 +91,10 @@ services:
         public: false
         arguments:
             - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@kuleuven_authentication.service.firewall_helper"
+            - "@kernel"
             - "@security.token_storage"
             - "@security.role_hierarchy"
-            - "@kernel"
         tags:
             -
                 name: data_collector
@@ -121,6 +131,7 @@ services:
             - "%shibboleth_username_attribute%"
             - "%shibboleth_authenticated_attribute%"
             - "%shibboleth_logout_url_attribute%"
+            - "%authentication_attribute_requirements%"
             - "%shibboleth_default_charset%"
 
     kuleuven_authentication.security.authentication.entry_point:
@@ -201,8 +212,15 @@ services:
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 
-    kuleuven_authentication.service.ldap_user_provider:
-        class: "%kuleuven_authentication.service.ldap_user_provider.class%"
+    kuleuven_authentication.service.ldap_user_provider: # deprecated
+        class: "%kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class%"
+        arguments:
+            - "@kuleuven_authentication.service.ldap_attributes_provider"
+            - "@kuleuven_authentication.service.attribute_definitions_provider"
+        deprecated: ~
+
+    kuleuven_authentication.service.shibboleth_via_ldap_user_provider:
+        class: "%kuleuven_authentication.service.shibboleth_via_ldap_user_provider.class%"
         arguments:
             - "@kuleuven_authentication.service.ldap_attributes_provider"
             - "@kuleuven_authentication.service.attribute_definitions_provider"
@@ -243,8 +261,7 @@ services:
             - "@session"
             - "@security.token_storage"
             - "@kuleuven_authentication.service.shibboleth_service_provider"
-            - "@security.authentication.manager"
-            - ""
+            - "kuleuven_authentication"
         calls:
             - [setLogger, ["@?logger"]]
         tags:

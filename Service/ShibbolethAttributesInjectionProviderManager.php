@@ -8,14 +8,14 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 class ShibbolethAttributesInjectionProviderManager
 {
     /**
-     * @var AttributesProviderInterface[]|ArrayCollection
-     */
-    protected $providerPropertiesCollection;
-
-    /**
      * @var AttributeDefinitionsProviderInterface
      */
     protected $attributeDefinitionsProvider;
+
+    /**
+     * @var AttributesInjectionProviderInterface[]|ArrayCollection
+     */
+    protected $providerPropertiesCollection;
 
     /**
      * @param AttributeDefinitionsProviderInterface $attributeDefinitionsProvider
@@ -33,6 +33,9 @@ class ShibbolethAttributesInjectionProviderManager
     public function addProvider(AttributesInjectionProviderInterface $provider, $priority = 0)
     {
         if ($provider instanceof ParameterAttributesProvider && 0 === $priority) {
+            $priority = -INF;
+        }
+        if ($provider instanceof HeaderAttributesProvider && 0 === $priority) {
             $priority = -INF;
         }
         $this->providerPropertiesCollection->add(['priority' => $priority, 'provider' => $provider]);

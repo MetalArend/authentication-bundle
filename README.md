@@ -129,6 +129,8 @@ To be succesfully authenticated, at least two attributes should be present:
 If you don't have Shibboleth running locally, you could add these attributes manually to your server environment,
 or add them to the $_SERVER array in for example your app_dev.php.
 
+####Parameter injector
+
 This bundle however lets you overwrite any attribute from within your parameters.yml,
 through the '\Kuleuven\AuthenticationBundle\Service\ParameterAttributesProvider' service that uses
 the 'authentication_attribute_overwrites' parameter to inject an array of server attributes.
@@ -153,6 +155,58 @@ parameters:
         Shib-Person-uid: '<(string)your-uid>'
 ```
 
+The parameter injector will always overwrite any other server attributes,
+unless you would overwrite the priority of the service. By default the priority is set to -INF.
+
+####Header injector
+
+You could also overwrite specific attributes in your request,
+through the '\Kuleuven\AuthenticationBundle\Service\HeaderAttributesProvider' service that uses
+the symfony request headers to inject an array of server attributes.
+
+By default this feature is disabled, so you have to explicitly enable it.
+
+```yml
+# app/config/config_dev.yml
+kuleuven_authentication:
+    ...
+    authentication_attribute_headers_enabled: true
+```
+
+Now you can use something like Requestly to overwrite attributes in your application,
+by sending them as headers with your request.
+
+The header injector will always overwrite any other server attributes,
+unless you would overwrite the priority of the service. By default the priority is set to -INF.
+
+####LDAP attributes injector
+
+You can use LDAP to request some of the server attributes from a specific person,
+through the '\Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider' service that uses
+the 'authentication_attribute_ldap_filter' parameter to inject an LDAP result array of server attributes.
+
+By default this feature is disabled, so you have to explicitly enable it.
+ 
+```yml
+# app/config/config_dev.yml
+kuleuven_authentication:
+    ...
+    authentication_attribute_ldap_enabled: true
+```
+
+Once enabled, you can add your LDAP filter. Make sure the filter is unique enough to only provide one user.
+
+```yml
+# app/config/parameters.yml
+parameters:
+    ...
+    authentication_attribute_ldap_filter: {uid: '<(string)your-uid>'}
+```
+
+It might be possible that you also need to enable LDAP - if so, jump to the LDAP chapter further down.
+
+####Custom injector
+
 If you want to add other services to populate your server attributes,
 they should implement '\Kuleuven\AuthenticationBundle\Service\AttributesInjectionProviderInterface',
 and should be tagged with 'kuleuven_authentication.shibboleth_attributes_injector'.
@@ -165,11 +219,6 @@ and should be tagged with 'kuleuven_authentication.shibboleth_attributes_injecto
         tags:
             - { name: kuleuven_authentication.shibboleth_attributes_injector }
 ```
-
-An example of such an injection is the built-in LDAP attribute provider, explained further on in this document.
-
-Notice that the authentication_attribute_overwrites parameter will always overwrite any other server attributes,
-unless you would overwrite the priority of the corresponding service. By default the priority is set on -INF.
 
 Change the default firewall settings (optional)
 -----------------------------------------------
@@ -317,24 +366,6 @@ parameters:
     ldap_port: '389'
 ```
 
-Overwrite Shibboleth server attributes (optional)
--------------------------------------------------
-
-You can use LDAP to provide Shibboleth server attributes,
-through the '\Kuleuven\AuthenticationBundle\Service\LdapAttributesProvider' service that uses
-the 'authentication_attribute_ldap_filter' parameter to inject an LDAP result array of server attributes.
-
-By default this feature is disabled, so you have to explicitly enable it. Once enabled, you can add your LDAP filter.
-Make sure the filter is unique enough to only provide one user.
-
-```yml
-# app/config/parameters.yml
-parameters:
-    ...
-    authentication_attribute_ldap_enabled: true
-    authentication_attribute_ldap_filter: {uid: '<(string)your-uid>'}
-```
-
 Impersonate users (optional)
 ----------------------------
 
@@ -355,11 +386,11 @@ security:
     providers:
        chain_provider:
             chain:
-                providers: [kuleuven_authentication.service.shibboleth_user_provider, kuleuven_authentication.service.ldap_user_provider]
-        kuleuven_authentication.service.ldap_user_provider:
-            id: kuleuven_authentication.service.ldap_user_provider
+                providers: [kuleuven_authentication.service.shibboleth_user_provider, kuleuven_authentication.service.shibboleth_via_ldap_user_provider]
         kuleuven_authentication.service.shibboleth_user_provider:
             id: kuleuven_authentication.service.shibboleth_user_provider 
+        kuleuven_authentication.service.shibboleth_via_ldap_user_provider:
+            id: kuleuven_authentication.service.shibboleth_via_ldap_user_provider
     ...
     firewalls:
         ...
@@ -407,25 +438,38 @@ Check if you are behind a certain firewall with the FirewallHelper service.
 Upcoming
 ========
 
-- TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
-- TODO Check if the Shib-Handler attribute is present, and give notice if it is different than the configuration
-- TODO Add the expected identity-provider value, and check for it on production (and use it locally as an overwrite?)
-- TODO Send notice if LDAP filter returns more than 1 user
-- TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
-- TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
-- TODO Make it possible to extend vs overwrite the attribute definitions (extra parameter?)
-- TODO Add use_headers again, with HeaderAttributesProvider implementing AttributesProviderInterface
-- TODO provide examples: how to add an automatic user save on visit
-- TODO Add providerKey in token support checks
-- TODO Implement LoggerAware in some extra classes
-- TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
-- TODO Implement ldap.jquery.js
-- TODO Activate Person Data API
-- TODO Instead of overwriting the switchuser_listener, add a new Security Factory
-- TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
+Security
+--------
+- Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
+- Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
+- Add providerKey in token support checks
+
+Logging
+-------
+- Use one central proxy logger for the authentication bundle
+- Implement LoggerAware in some extra classes
+
+Data Collector
+--------------
+- Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
+
+Switch User
+-----------
+- Instead of overwriting the switchuser_listener, add a new Security Factory
+- Add KuleuvenSwitchUserToken
+- ShibbolethSwitchUserPersistenceSubscriber should authenticate token in onKernelRequest with ShibbolethAuthenticationProvider
+
+Docker
+------
+- Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
     - For KU Leuven: To request a commercial certificate, please refer to: https://certificates.kuleuven.be
     - SSL certificates: Download the certificate from http://shib.kuleuven.be/download/metadata/metadata.associatie.kuleuven.be.crt
     - Metadata provider: https://shib.kuleuven.be/download/metadata/metadata-kuleuven.xml
     - Service providers part of the KU Leuven federation will have to configure the MetadataProvider to get the metadata from https://shib.kuleuven.be/download/metadata/metadata-kuleuven.xml
     - For SP's part of the Association KU Leuven federation the URL is https://shib.kuleuven.be/download/metadata/metadata-kulassoc.xml
     - For Service Providers part of the K.U.Leuven federation or the Association K.U.Leuven federation, we have configured such an attribute-map: https://shib.kuleuven.be/download/sp/2.x/attribute-map.xml
+
+Extra
+-----
+- Send notice if LDAP filter returns more than 1 user
+- Provide examples: how to add an automatic user save on visit

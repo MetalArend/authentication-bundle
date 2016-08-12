@@ -5,7 +5,7 @@ namespace Kuleuven\AuthenticationBundle\Service;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Ldap\Entry;
 
-class LdapAttributesProvider implements AttributesProviderInterface, AttributesInjectionProviderInterface
+class LdapAttributesProvider implements AttributesByUsernameProviderInterface, AttributesInjectionProviderInterface
 {
     /**
      * @var LdapService
@@ -94,6 +94,11 @@ class LdapAttributesProvider implements AttributesProviderInterface, AttributesI
 
         // Return attributes
         return $attributes;
+    }
+
+    public function getAttributesByUsername($username)
+    {
+        return $this->getAttributesByFilter(['uid' => $username]);
     }
 
     /**

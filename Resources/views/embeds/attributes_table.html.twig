@@ -11,8 +11,13 @@
     </div>
 
     <div class="metric">
-        <span class="value">{{ include('KuleuvenAuthenticationBundle:Icon:' ~ (attribute(shibboleth.attributes, shibboleth.authenticatedAttribute) ? 'yes' : 'no') ~ '.svg.twig') }}</span>
-        <span class="label">Authenticated<br/><small>{{ shibboleth.authenticatedAttribute }}</small></span>
+        <span class="value">{{ include('KuleuvenAuthenticationBundle:Icon:' ~ (shibboleth.authenticated ? 'yes' : 'no') ~ '.svg.twig') }}</span>
+        <span class="label">Authenticated<br/><small>{{ shibboleth.authenticationRequirements|keys|join(', ') }}</small></span>
+    </div>
+
+    <div class="metric">
+        <span class="value">{{ attribute(shibboleth.attributes, shibboleth.authenticatedAttribute) }}</span>
+        <span class="label">IDP<br/><small>{{ shibboleth.authenticatedAttribute }}</small></span>
     </div>
 </div>
 

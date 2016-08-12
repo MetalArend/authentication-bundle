@@ -90,7 +90,7 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
         $this->log(sprintf('Shibboleth attributes found: %s', json_encode($attributes)));
 
         if (!$this->shibbolethServiceProvider->isAuthenticated()) {
-            $this->log('Authentication key not found');
+            $this->log('Shibboleth has not authenticated your request.');
             return;
         }
 
@@ -151,8 +151,8 @@ class ShibbolethAuthenticationListener implements ListenerInterface, LoggerAware
 
             $token = $this->tokenStorage->getToken();
             if ($token instanceof KuleuvenUserToken) {
-                $this->log('Remove token');
                 $this->tokenStorage->setToken(null);
+                $this->log(sprintf('Token removed from storage', $token));
             }
 
             try {
