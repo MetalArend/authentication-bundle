@@ -25,14 +25,15 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
 {
     use LoggerTrait;
 
-    private $tokenStorage;
-    private $provider;
-    private $userChecker;
-    private $providerKey;
-    private $accessDecisionManager;
-    private $usernameParameter;
-    private $role;
-    private $dispatcher;
+    protected $tokenStorage;
+    protected $provider;
+    protected $userChecker;
+    protected $providerKey;
+    protected $accessDecisionManager;
+    protected $logger;
+    protected $usernameParameter;
+    protected $role;
+    protected $dispatcher;
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
@@ -55,6 +56,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $this->userChecker = $userChecker;
         $this->providerKey = $providerKey;
         $this->accessDecisionManager = $accessDecisionManager;
+        $this->logger = $logger;
         $this->usernameParameter = $usernameParameter;
         $this->role = $role;
         $this->dispatcher = $dispatcher;

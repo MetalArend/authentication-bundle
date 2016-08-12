@@ -7,7 +7,6 @@ use Kuleuven\AuthenticationBundle\Traits\LoggerTrait;
 use Psr\Log\LoggerAwareInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -50,7 +49,7 @@ class ShibbolethSwitchUserPersistenceSubscriber implements EventSubscriberInterf
         ];
     }
 
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest()
     {
         $token = $this->tokenStorage->getToken();
         if (!empty($token)) {

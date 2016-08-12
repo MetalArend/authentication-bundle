@@ -179,7 +179,7 @@ trait ShibbolethAttributesResolverTrait
      */
     public function getDisplayName()
     {
-        return ($this->hasAttribute('Shib-Person-commonName')) ? $this->getCommonName() : $this->getUsername();
+        return ($this->hasAttribute('Shib-Person-commonName')) ? $this->getCommonName() : $this->getUID();
     }
 
     /**

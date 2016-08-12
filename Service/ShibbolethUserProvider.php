@@ -44,7 +44,6 @@ class ShibbolethUserProvider implements UserProviderInterface
         $attributeDefinitions = $this->attributeDefinitionsProvider->getAttributeDefinitions();
         $attributes = [];
         foreach ($attributeDefinitions as $idOrAlias => $attributeDefinition) {
-            $value = null;
             switch (true) {
                 case isset($providerAttributes[$idOrAlias]):
                     $value = $providerAttributes[$idOrAlias];
