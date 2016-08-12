@@ -438,22 +438,38 @@ Check if you are behind a certain firewall with the FirewallHelper service.
 Upcoming
 ========
 
-- TODO Add KuleuvenSwitchUserToken
-- TODO ShibbolethSwitchUserPersistenceSubscriber should authenticate token in onKernelRequest with ShibbolethAuthenticationProvider
-- TODO Create sub arrays in the config.yml configuration settings: authentication, shibboleth, ldap
-- TODO Send notice if LDAP filter returns more than 1 user
-- TODO Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
-- TODO Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
-- TODO provide examples: how to add an automatic user save on visit
-- TODO Add providerKey in token support checks
-- TODO Implement LoggerAware in some extra classes
-- TODO Use one central proxy logger for the authentication bundle
-- TODO Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
-- TODO Instead of overwriting the switchuser_listener, add a new Security Factory
-- TODO Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
+Security
+--------
+- Make it possible to add your own attribute-map.xml file (including external url) - downloading in compiler pass?
+- Find a way to detect which fields are multivalue, instead of hard-coding it into the AttributeDefinitionsProvider
+- Add providerKey in token support checks
+
+Logging
+-------
+- Use one central proxy logger for the authentication bundle
+- Implement LoggerAware in some extra classes
+
+Data Collector
+--------------
+- Add authentication (including use_headers), LDAP, PersonDataAPI and impersonation to DataCollector
+
+Switch User
+-----------
+- Instead of overwriting the switchuser_listener, add a new Security Factory
+- Add KuleuvenSwitchUserToken
+- ShibbolethSwitchUserPersistenceSubscriber should authenticate token in onKernelRequest with ShibbolethAuthenticationProvider
+
+Docker
+------
+- Create Docker container with https://shib.kuleuven.be/docs/sp/2.x/install-sp-2.x-windows2008.html
     - For KU Leuven: To request a commercial certificate, please refer to: https://certificates.kuleuven.be
     - SSL certificates: Download the certificate from http://shib.kuleuven.be/download/metadata/metadata.associatie.kuleuven.be.crt
     - Metadata provider: https://shib.kuleuven.be/download/metadata/metadata-kuleuven.xml
     - Service providers part of the KU Leuven federation will have to configure the MetadataProvider to get the metadata from https://shib.kuleuven.be/download/metadata/metadata-kuleuven.xml
     - For SP's part of the Association KU Leuven federation the URL is https://shib.kuleuven.be/download/metadata/metadata-kulassoc.xml
     - For Service Providers part of the K.U.Leuven federation or the Association K.U.Leuven federation, we have configured such an attribute-map: https://shib.kuleuven.be/download/sp/2.x/attribute-map.xml
+
+Extra
+-----
+- Send notice if LDAP filter returns more than 1 user
+- Provide examples: how to add an automatic user save on visit
