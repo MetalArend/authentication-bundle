@@ -3,12 +3,12 @@
 {% block page_title 'Shibboleth' %}
 
 {% block toolbar %}
-    {% if collector.tokenClass %}
-        {% set is_authenticated = collector.enabled and collector.authenticated %}
-        {% set is_source_authenticated = collector.enabled and collector.sourceAuthenticated %}
-        {% set color_code = is_authenticated ? '' : 'yellow' %}
+    {% if not collector.authenticated %}
+        {% set color_code = 'red' %}
+    {% elseif not collector.enabled %}
+        {% set color_code = 'yellow' %}
     {% else %}
-        {% set color_code = collector.enabled ? 'red' : '' %}
+        {% set color_code = '' %}
     {% endif %}
 
     {% set icon %}
@@ -17,85 +17,11 @@
     {% endset %}
 
     {% set text %}
-        {% if collector.tokenClass %}
+        {% if not collector.enabled %}
             <div class="sf-toolbar-info-piece">
-                <b>Logged in as</b>
-                <span>{{ collector.user }}</span>
+                <span>Shibboleth firewall is not enabled.</span>
             </div>
-
-            <div class="sf-toolbar-info-piece">
-                <b>Authenticated</b>
-                <span class="sf-toolbar-status sf-toolbar-status-{{ is_authenticated ? 'green' : 'red' }}">{{ is_authenticated ? 'Yes' : 'No' }}</span>
-            </div>
-
-            {% if collector.displayName is not empty and collector.displayName != collector.user %}
-                <div class="sf-toolbar-info-piece">
-                    <b>Name</b>
-                    <span>{{ collector.displayName }}</span>
-                </div>
-            {% endif %}
-
-            {% if collector.affiliation is not empty %}
-                <div class="sf-toolbar-info-piece">
-                    <b>Affiliation</b>
-                    <span>{{ collector.affiliation|join(', ') }}</span>
-                </div>
-            {% endif %}
-
-            {% if collector.tokenClass != null %}
-                <div class="sf-toolbar-info-piece">
-                    <b>Token class</b>
-                    <span>{{ collector.tokenClass|abbr_class }}</span>
-                </div>
-            {% endif %}
-
-            {% if collector.sourceUser is not empty %}
-                <hr/>
-
-                <div class="sf-toolbar-info-piece">
-                    <b>Sourced as</b>
-                    <span>{{ collector.sourceUser }}</span>
-                </div>
-
-                <div class="sf-toolbar-info-piece">
-                    <b>Authenticated</b>
-                    <span class="sf-toolbar-status sf-toolbar-status-{{ is_source_authenticated ? 'green' : 'red' }}">{{ is_source_authenticated ? 'Yes' : 'No' }}</span>
-                </div>
-
-                {% if collector.sourceDisplayName is not empty and collector.sourceDisplayName != collector.sourceUser %}
-                    <div class="sf-toolbar-info-piece">
-                        <b>Name</b>
-                        <span>{{ collector.sourceDisplayName }}</span>
-                    </div>
-                {% endif %}
-
-                {% if collector.sourceAffiliation is not empty %}
-                    <div class="sf-toolbar-info-piece">
-                        <b>Affiliation</b>
-                        <span>{{ collector.sourceAffiliation|join(', ') }}</span>
-                    </div>
-                {% endif %}
-
-                {% if collector.sourceTokenClass != null %}
-                    <div class="sf-toolbar-info-piece">
-                        <b>Token class</b>
-                        <span>{{ collector.sourceTokenClass|abbr_class }}</span>
-                    </div>
-                {% endif %}
-
-            {% endif %}
-
-            <div class="sf-toolbar-info-piece">
-                <b>Actions</b>
-                {% if collector.shibboleth.reachable %}
-                    <span><a href="{{ collector.shibboleth.statusUrl }}">Status</a></span>
-                    <br/><span><a href="{{ collector.shibboleth.logoutUrl }}">Logout</a></span>
-                    <br/><span><a href="{{ collector.shibboleth.overviewUrl }}">Overview</a></span>
-                {% else %}
-                    <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.shibboleth.handlerPath }} not reachable</span>
-                {% endif %}
-            </div>
-        {% elseif collector.enabled %}
+        {% elseif not collector.authenticated %}
             <div class="sf-toolbar-info-piece">
                 <b>Authenticated</b>
                 <span class="sf-toolbar-status sf-toolbar-status-red">No</span>
@@ -112,7 +38,71 @@
             </div>
         {% else %}
             <div class="sf-toolbar-info-piece">
-                <span>The security is disabled.</span>
+                <b>Logged in as</b>
+                <span>
+                    {{ collector.user }}
+                    {% if collector.displayName is not empty and collector.displayName != collector.user %}
+                        ({{ collector.displayName }})
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="sf-toolbar-info-piece">
+                <b>Authenticated</b>
+                <span class="sf-toolbar-status sf-toolbar-status-{{ collector.authenticated ? 'green' : 'red' }}">{{ collector.authenticated ? 'Yes' : 'No' }}</span>
+            </div>
+
+            {% if collector.affiliation is not empty %}
+                <div class="sf-toolbar-info-piece">
+                    <b>Affiliation</b>
+                    <span>{{ collector.affiliation|join(', ') }}</span>
+                </div>
+            {% endif %}
+
+            {% if collector.tokenClass is not empty %}
+                <div class="sf-toolbar-info-piece">
+                    <b>Token class</b>
+                    <span>{{ collector.tokenClass|abbr_class }}</span>
+                </div>
+            {% endif %}
+
+            {% if collector.impersonatedUser is not empty %}
+                <hr/>
+                <div class="sf-toolbar-info-piece">
+                    <b>Impersonating</b>
+                    <span>
+                        {{ collector.impersonatedUser }}
+                        {% if collector.impersonatedDisplayName is not empty and collector.impersonatedDisplayName != collector.impersonatedUser %}
+                            ({{ collector.impersonatedDisplayName }})
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% if collector.impersonatedAffiliation is not empty %}
+                    <div class="sf-toolbar-info-piece">
+                        <b>Impersonated affiliation</b>
+                        <span>{{ collector.impersonatedAffiliation|join(', ') }}</span>
+                    </div>
+                {% endif %}
+
+                {% if collector.impersonatedTokenClass is not empty %}
+                    <div class="sf-toolbar-info-piece">
+                        <b>Impersonated token class</b>
+                        <span>{{ collector.impersonatedTokenClass|abbr_class }}</span>
+                    </div>
+                {% endif %}
+                <hr/>
+            {% endif %}
+
+            <div class="sf-toolbar-info-piece">
+                <b>Actions</b>
+                {% if collector.shibboleth.reachable %}
+                    <span><a href="{{ collector.shibboleth.statusUrl }}">Status</a></span>
+                    <br/><span><a href="{{ collector.shibboleth.logoutUrl }}">Logout</a></span>
+                    <br/><span><a href="{{ collector.shibboleth.overviewUrl }}">Overview</a></span>
+                {% else %}
+                    <span class="sf-toolbar-status sf-toolbar-status-red">{{ collector.shibboleth.handlerPath }} not reachable</span>
+                {% endif %}
             </div>
         {% endif %}
     {% endset %}
@@ -121,7 +111,7 @@
 {% endblock %}
 
 {% block menu %}
-    <span class="label {{ not collector.enabled or not collector.tokenClass ? 'disabled' }}">
+    <span class="label {{ not collector.enabled ? 'disabled' }}">
         <span class="icon"><img src="data:image/png;base64,{{ collector.image }}" alt="Shibboleth" style="width: 26px; filter: grayscale(100%); -webkit-filter: grayscale(100%);"/></span>
         <strong>Shibboleth</strong>
     </span>
@@ -130,13 +120,7 @@
 {% block panel %}
     {% if collector.shibboleth.attributes is not empty %}
         <h2>Shibboleth</h2>
-        {% if collector.tokenClass or collector.enabled %}
-            {% include 'KuleuvenAuthenticationBundle:embeds:attributes_table.html.twig' with {shibboleth: collector.shibboleth} only %}
-        {% else %}
-            <div class="sf-toolbar-info-piece">
-                <span>The security is disabled.</span>
-            </div>
-        {% endif %}
+        {% include 'KuleuvenAuthenticationBundle:embeds:attributes_table.html.twig' with {shibboleth: collector.shibboleth} only %}
     {% endif %}
     {% if collector.shibboleth is not empty %}
         <h2>Service Provider Settings</h2>

@@ -91,9 +91,10 @@ services:
         public: false
         arguments:
             - "@kuleuven_authentication.service.shibboleth_service_provider"
+            - "@kuleuven_authentication.service.firewall_helper"
+            - "@kernel"
             - "@security.token_storage"
             - "@security.role_hierarchy"
-            - "@kernel"
         tags:
             -
                 name: data_collector

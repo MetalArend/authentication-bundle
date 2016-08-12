@@ -2,6 +2,9 @@
 
 namespace Kuleuven\AuthenticationBundle\Collector;
 
+use Kuleuven\AuthenticationBundle\Model\KuleuvenUser;
+use Kuleuven\AuthenticationBundle\Security\ShibbolethAuthenticationListener;
+use Kuleuven\AuthenticationBundle\Service\FirewallHelper;
 use Kuleuven\AuthenticationBundle\Service\ShibbolethServiceProvider;
 use Kuleuven\AuthenticationBundle\Security\KuleuvenUserToken;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,27 +13,26 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\Role\RoleInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuthenticationDataCollector extends DataCollector implements DataCollectorInterface
 {
     /**
-     * @var null|TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var null|RoleHierarchyInterface
-     */
-    protected $roleHierarchy;
-
-    /**
      * @var ShibbolethServiceProvider
      */
     protected $shibbolethServiceProvider;
+
+    /**
+     * @var FirewallHelper
+     */
+    protected $firewallHelper;
+
+    /**
+     * @var null|TokenStorageInterface
+     */
+    protected $tokenStorage;
 
     /**
      * @var KernelInterface
@@ -38,16 +40,16 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     protected $kernel;
 
     /**
-     * @param ShibbolethServiceProvider   $shibbolethServiceProvider
-     * @param TokenStorageInterface|null  $tokenStorage
-     * @param RoleHierarchyInterface|null $roleHierarchy
-     * @param KernelInterface             $kernel
+     * @param ShibbolethServiceProvider  $shibbolethServiceProvider
+     * @param FirewallHelper             $firewallHelper
+     * @param TokenStorageInterface|null $tokenStorage
+     * @param KernelInterface            $kernel
      */
-    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, TokenStorageInterface $tokenStorage = null, RoleHierarchyInterface $roleHierarchy = null, KernelInterface $kernel)
+    public function __construct(ShibbolethServiceProvider $shibbolethServiceProvider, FirewallHelper $firewallHelper, KernelInterface $kernel, TokenStorageInterface $tokenStorage = null)
     {
         $this->shibbolethServiceProvider = $shibbolethServiceProvider;
+        $this->firewallHelper = $firewallHelper;
         $this->tokenStorage = $tokenStorage;
-        $this->roleHierarchy = $roleHierarchy;
         $this->kernel = $kernel;
         $this->data = [];
     }
@@ -61,7 +63,7 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     }
 
     /**
-     * @return null|KuleuvenUserToken
+     * @return TokenInterface
      */
     protected function findToken()
     {
@@ -87,24 +89,6 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
             }
         }
         return null;
-    }
-
-    /**
-     * @param $roles
-     * @return array
-     */
-    protected function findInheritedRoles($roles)
-    {
-        $inheritedRoles = [];
-        if (null !== $this->roleHierarchy) {
-            $allRoles = $this->roleHierarchy->getReachableRoles($roles);
-            foreach ($allRoles as $role) {
-                if (!in_array($role, $roles, true)) {
-                    $inheritedRoles[] = $role;
-                }
-            }
-        }
-        return $inheritedRoles;
     }
 
     /**
@@ -139,65 +123,28 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
             ],
         ]);
 
-        if (null === $token = $this->findToken()) {
-            $this->data = array_replace($this->data, [
-                'enabled'                 => $this->isTokenStorageEnabled(),
-                'authenticated'           => false,
-                'token_class'             => null,
-                'user'                    => '',
-                'display_name'            => '',
-                'affiliation'             => null,
-                'attributes'              => [],
-                'roles'                   => [],
-                'inherited_roles'         => [],
-                'supports_role_hierarchy' => null !== $this->roleHierarchy,
-            ]);
-        } else {
-            $this->data = array_replace($this->data, [
-                'enabled'                 => $this->isTokenStorageEnabled(),
-                'authenticated'           => $token->isAuthenticated(),
-                'token_class'             => get_class($token),
-                'user'                    => $token->getUsername(),
-                'display_name'            => $token->getUser()->getDisplayName(),
-                'affiliation'             => $token->getUser()->getAffiliation(),
-                'attributes'              => $token->getUser()->getAttributes(),
-                'roles'                   => array_map(function (RoleInterface $role) {
-                    return $role->getRole();
-                }, $token->getRoles()),
-                'inherited_roles'         => array_map(function (RoleInterface $role) {
-                    return $role->getRole();
-                }, $this->findInheritedRoles($token->getRoles())),
-                'supports_role_hierarchy' => null !== $this->roleHierarchy,
-            ]);
-        }
+        $token = $this->findToken();
+        $user = (!empty($token) ? $token->getUser() : null);
+        $sourceToken = $this->findSourceToken();
+        $source = (!empty($sourceToken) ? $sourceToken->getUser() : null);
 
-        if (null === $source = $this->findSourceToken()) {
-            $this->data = array_replace($this->data, [
-                'source_authenticated'   => false,
-                'source_token_class'     => null,
-                'source_user'            => '',
-                'source_display_name'    => '',
-                'source_affiliation'     => null,
-                'source_attributes'      => [],
-                'source_roles'           => [],
-                'source_inherited_roles' => [],
-            ]);
-        } else {
-            $this->data = array_replace($this->data, [
-                'source_authenticated'   => $source->isAuthenticated(),
-                'source_token_class'     => get_class($source),
-                'source_user'            => $source->getUsername(),
-                'source_affiliation'     => $source->getUser()->getAffiliation(),
-                'source_display_name'    => $source->getUser()->getDisplayName(),
-                'source_attributes'      => $source->getUser()->getAttributes(),
-                'source_roles'           => array_map(function (RoleInterface $role) {
-                    return $role->getRole();
-                }, $source->getRoles()),
-                'source_inherited_roles' => array_map(function (RoleInterface $role) {
-                    return $role->getRole();
-                }, $this->findInheritedRoles($source->getRoles())),
-            ]);
-        }
+        $shibbolethUser = (empty($source) ? $user : $source);
+        $impersonatedUser = (empty($source) ? null : $user);
+
+        $this->data = array_replace($this->data, [
+            'enabled'                   => $this->firewallHelper->isProtectedBy(ShibbolethAuthenticationListener::class),
+            'authenticated'             => $this->shibbolethServiceProvider->isAuthenticated(),
+            'user'                      => ($shibbolethUser instanceof UserInterface ? $shibbolethUser->getUsername() : $shibbolethUser),
+            'display_name'              => ($shibbolethUser instanceof KuleuvenUser ? $shibbolethUser->getDisplayName() : ''),
+            'affiliation'               => ($shibbolethUser instanceof KuleuvenUser ? $shibbolethUser->getAffiliation() : ''),
+            'attributes'                => ($shibbolethUser instanceof KuleuvenUser ? $shibbolethUser->getAttributes() : []),
+            'token_class'               => (!empty($token) ? get_class($token) : ''),
+            'impersonated_user'         => ($impersonatedUser instanceof UserInterface ? $impersonatedUser->getUsername() : $impersonatedUser),
+            'impersonated_display_name' => ($impersonatedUser instanceof KuleuvenUser ? $impersonatedUser->getDisplayName() : ''),
+            'impersonated_affiliation'  => ($impersonatedUser instanceof KuleuvenUser ? $impersonatedUser->getAffiliation() : ''),
+            'impersonated_attributes'   => ($impersonatedUser instanceof KuleuvenUser ? $impersonatedUser->getAttributes() : []),
+            'impersonated_token_class'  => (!empty($sourceToken) ? get_class($sourceToken) : ''),
+        ]);
     }
 
     /**
@@ -217,17 +164,6 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     }
 
     /**
-     * Checks if the data contains information about inherited roles. Still the inherited
-     * roles can be an empty array.
-     *
-     * @return bool true if the profile was contains inherited role information.
-     */
-    public function supportsRoleHierarchy()
-    {
-        return $this->data['supports_role_hierarchy'];
-    }
-
-    /**
      * Checks if security is enabled.
      *
      * @return bool true if security is enabled, false otherwise
@@ -235,6 +171,16 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     public function isEnabled()
     {
         return $this->data['enabled'];
+    }
+
+    /**
+     * Checks if the user is authenticated or not.
+     *
+     * @return bool true if the user is authenticated, false otherwise
+     */
+    public function isAuthenticated()
+    {
+        return $this->data['authenticated'];
     }
 
     /**
@@ -278,36 +224,6 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
     }
 
     /**
-     * Gets the roles of the user.
-     *
-     * @return array The roles
-     */
-    public function getRoles()
-    {
-        return $this->data['roles'];
-    }
-
-    /**
-     * Gets the inherited roles of the user.
-     *
-     * @return array The inherited roles
-     */
-    public function getInheritedRoles()
-    {
-        return $this->data['inherited_roles'];
-    }
-
-    /**
-     * Checks if the user is authenticated or not.
-     *
-     * @return bool true if the user is authenticated, false otherwise
-     */
-    public function isAuthenticated()
-    {
-        return $this->data['authenticated'];
-    }
-
-    /**
      * Get the class name of the security token.
      *
      * @return string The token
@@ -322,9 +238,9 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      *
      * @return string The source user
      */
-    public function getSourceUser()
+    public function getImpersonatedUser()
     {
-        return $this->data['source_user'];
+        return $this->data['impersonated_user'];
     }
 
     /**
@@ -332,9 +248,9 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      *
      * @return string The display name
      */
-    public function getSourceDisplayName()
+    public function getImpersonatedDisplayName()
     {
-        return $this->data['source_display_name'];
+        return $this->data['impersonated_display_name'];
     }
 
     /**
@@ -342,9 +258,9 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      *
      * @return string The unscoped affiliation
      */
-    public function getSourceAffiliation()
+    public function getImpersonatedAffiliation()
     {
-        return $this->data['source_affiliation'];
+        return $this->data['impersonated_affiliation'];
     }
 
     /**
@@ -352,39 +268,9 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      *
      * @return string The attributes
      */
-    public function getSourceAttributes()
+    public function getImpersonatedAttributes()
     {
-        return $this->data['source_attributes'];
-    }
-
-    /**
-     * Gets the roles of the source user.
-     *
-     * @return array The source roles
-     */
-    public function getSourceRoles()
-    {
-        return $this->data['source_roles'];
-    }
-
-    /**
-     * Gets the inherited roles of the source user.
-     *
-     * @return array The source inherited roles
-     */
-    public function getSourceInheritedRoles()
-    {
-        return $this->data['source_inherited_roles'];
-    }
-
-    /**
-     * Checks if the source user is authenticated or not.
-     *
-     * @return bool true if the source user is authenticated, false otherwise
-     */
-    public function isSourceAuthenticated()
-    {
-        return $this->data['source_authenticated'];
+        return $this->data['impersonated_attributes'];
     }
 
     /**
@@ -392,17 +278,9 @@ class AuthenticationDataCollector extends DataCollector implements DataCollector
      *
      * @return string The source token
      */
-    public function getSourceTokenClass()
+    public function getImpersonatedTokenClass()
     {
-        return $this->data['source_token_class'];
-    }
-
-    /**
-     * @return null|UserInterface
-     */
-    public function getSessionUser()
-    {
-        return $this->data['session_user'];
+        return $this->data['impersonated_token_class'];
     }
 
     /**
