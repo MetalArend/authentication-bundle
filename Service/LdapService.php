@@ -20,7 +20,7 @@ class LdapService
      * @var string
      */
     protected $password;
-    ~
+    
     /**
      * @var string
      */

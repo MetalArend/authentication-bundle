@@ -41,7 +41,6 @@ class FirewallHelper
         foreach ($listenersArray[0] as $listener) {
             if ($class === get_class($listener)) {
                 return true;
-                break;
             }
         }
         return false;

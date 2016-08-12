@@ -66,7 +66,8 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
      * Handles the switch to another user.
      *
      * @param GetResponseEvent $event A GetResponseEvent instance
-     * @throws \LogicException if switching to a user failed
+     * @throws AccessDeniedException
+     * @throws AuthenticationException
      */
     public function handle(GetResponseEvent $event)
     {
@@ -160,7 +161,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         if ($originalToken) {
             $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $originalToken);
         } else {
-            $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $this->tokenStorage->getToken());
+            $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $token);
         }
 
         $token = new KuleuvenUserToken($user, $attributes, $this->providerKey, $roles);
