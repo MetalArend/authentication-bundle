@@ -100,11 +100,10 @@ class LdapService
         // Bind
         $this->bind();
 
-        // Search
+        // Search - maxItems not added
         $results = $this->ldap->query($this->base, $filter, [
             'attrsOnly' => $attrsOnly,
             'filter'    => $attributes,
-//            'maxItems'  => $maxItems,
             'sizeLimit' => $sizeLimit,
             'timeout'   => $timeLimit,
         ])->execute();
