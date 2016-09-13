@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class HeaderAttributesProvider implements AttributesInjectionProviderInterface
 {
     /**
-     * @var array
+     * @var RequestStack
      */
     protected $requestStack;
 

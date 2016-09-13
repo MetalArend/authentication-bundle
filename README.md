@@ -3,6 +3,8 @@
 This bundle adds a shibboleth authentication firewall to your Symfony3 project.
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/acd48adb-ec80-4c6b-ad7d-07585b93ec83/mini.png)](https://insight.sensiolabs.com/projects/acd48adb-ec80-4c6b-ad7d-07585b93ec83)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/?branch=master)
 
 Requirements
 ============

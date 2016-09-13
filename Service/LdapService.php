@@ -6,10 +6,32 @@ use Symfony\Component\Ldap\Ldap;
 
 class LdapService
 {
+    /**
+     * @var Ldap
+     */
+    protected $ldap;
+
+    /**
+     * @var string
+     */
     protected $rdn;
+
+    /**
+     * @var string
+     */
     protected $password;
+    
+    /**
+     * @var string
+     */
     protected $base;
 
+    /**
+     * @param Ldap $ldap
+     * @param string $rdn
+     * @param string $password
+     * @param string $base
+     */
     public function __construct(
         Ldap $ldap,
         $rdn = '',
@@ -23,11 +45,20 @@ class LdapService
         $this->base = $base;
     }
 
+    /**
+     *
+     */
     protected function bind()
     {
         $this->ldap->bind($this->rdn, $this->password);
     }
 
+    /**
+     * @param array $data
+     * @param string $type
+     * @param string $format
+     * @return string
+     */
     public function createFilter(array $data = [], $type = '&', $format = '%s')
     {
         $string = '';
@@ -46,6 +77,14 @@ class LdapService
         return "(${type}${string})";
     }
 
+    /**
+     * @param $filter
+     * @param array $attributes
+     * @param bool $attrsOnly
+     * @param int $sizeLimit
+     * @param int $timeLimit
+     * @return mixed
+     */
     public function search($filter, $attributes = [], $attrsOnly = false, $sizeLimit = 0, $timeLimit = 0)
     {
         // Create filter
@@ -61,11 +100,10 @@ class LdapService
         // Bind
         $this->bind();
 
-        // Search
+        // Search - maxItems not added
         $results = $this->ldap->query($this->base, $filter, [
             'attrsOnly' => $attrsOnly,
             'filter'    => $attributes,
-//            'maxItems'  => $maxItems,
             'sizeLimit' => $sizeLimit,
             'timeout'   => $timeLimit,
         ])->execute();
@@ -74,6 +112,14 @@ class LdapService
         return $results;
     }
 
+    /**
+     * @param $filter
+     * @param array $attributes
+     * @param bool $attrsOnly
+     * @param int $sizeLimit
+     * @param int $timeLimit
+     * @return mixed
+     */
     public function fuzzy($filter, $attributes = [], $attrsOnly = false, $sizeLimit = 0, $timeLimit = 0)
     {
         if (is_array($filter)) {

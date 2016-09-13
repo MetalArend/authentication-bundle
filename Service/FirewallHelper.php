@@ -34,11 +34,13 @@ class FirewallHelper
     public function isProtectedBy($class)
     {
         $request = $this->requestStack->getCurrentRequest();
+        if (empty($request)) {
+            throw new \RuntimeException('No request available');
+        }
         $listenersArray = $this->firewallMap->getListeners($request);
         foreach ($listenersArray[0] as $listener) {
             if ($class === get_class($listener)) {
                 return true;
-                break;
             }
         }
         return false;

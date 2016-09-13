@@ -25,14 +25,15 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
 {
     use LoggerTrait;
 
-    private $tokenStorage;
-    private $provider;
-    private $userChecker;
-    private $providerKey;
-    private $accessDecisionManager;
-    private $usernameParameter;
-    private $role;
-    private $dispatcher;
+    protected $tokenStorage;
+    protected $provider;
+    protected $userChecker;
+    protected $providerKey;
+    protected $accessDecisionManager;
+    protected $logger;
+    protected $usernameParameter;
+    protected $role;
+    protected $dispatcher;
 
     public function __construct(
         TokenStorageInterface $tokenStorage,
@@ -55,6 +56,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $this->userChecker = $userChecker;
         $this->providerKey = $providerKey;
         $this->accessDecisionManager = $accessDecisionManager;
+        $this->logger = $logger;
         $this->usernameParameter = $usernameParameter;
         $this->role = $role;
         $this->dispatcher = $dispatcher;
@@ -64,7 +66,8 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
      * Handles the switch to another user.
      *
      * @param GetResponseEvent $event A GetResponseEvent instance
-     * @throws \LogicException if switching to a user failed
+     * @throws AccessDeniedException
+     * @throws AuthenticationException
      */
     public function handle(GetResponseEvent $event)
     {
@@ -158,7 +161,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         if ($originalToken) {
             $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $originalToken);
         } else {
-            $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $this->tokenStorage->getToken());
+            $roles[] = new SwitchUserRole('ROLE_PREVIOUS_ADMIN', $token);
         }
 
         $token = new KuleuvenUserToken($user, $attributes, $this->providerKey, $roles);

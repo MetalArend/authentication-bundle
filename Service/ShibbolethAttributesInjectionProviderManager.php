@@ -76,7 +76,6 @@ class ShibbolethAttributesInjectionProviderManager
                     continue;
                 }
                 foreach ($attributes as $name => $value) {
-                    $attributeDefinition = null;
                     switch (true) {
                         case isset($attributeDefinitions[$name]):
                             $attributeDefinition = $attributeDefinitions[$name];

@@ -125,8 +125,6 @@ class ShibbolethServiceProvider implements AttributesByUsernameProviderInterface
         $this->logoutUrlAttribute = $logoutUrlAttribute;
         $this->authenticationRequirements = $authenticationRequirements;
         $this->defaultCharset = $defaultCharset;
-
-        return $this;
     }
 
     /**
@@ -239,7 +237,7 @@ class ShibbolethServiceProvider implements AttributesByUsernameProviderInterface
             $value = $this->getAttribute($checkName, $empty);
             if ($checkValue !== $value) {
                 try {
-                    $result = preg_match($checkValue, $value);
+                    $result = (1 === preg_match($checkValue, $value));
                 } catch (\Exception $e) {
                     $result = false;
                 }
