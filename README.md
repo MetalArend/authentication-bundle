@@ -3,8 +3,16 @@
 This bundle adds a shibboleth authentication firewall to your Symfony3 project.
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/acd48adb-ec80-4c6b-ad7d-07585b93ec83/mini.png)](https://insight.sensiolabs.com/projects/acd48adb-ec80-4c6b-ad7d-07585b93ec83)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/?branch=master)
+
+[![Build Status](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/build.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/build-status/master)
 [![Code Coverage](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/MetalArend/authentication-bundle/?branch=master)
+
+[![Latest Stable Version](https://poser.pugx.org/kuleuven/authentication-bundle/v/stable)](https://packagist.org/packages/kuleuven/authentication-bundle)
+[![Dependency Status](https://www.versioneye.com/user/projects/57d8018b430747003e149bde/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57d8018b430747003e149bde)
+
+[![Latest Unstable Version](https://poser.pugx.org/kuleuven/authentication-bundle/v/unstable)](https://packagist.org/packages/kuleuven/authentication-bundle)
+[![Dependency Status](https://www.versioneye.com/user/projects/57d80184430747004e18e260/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57d80184430747004e18e260)
 
 Requirements
 ============
