@@ -86,6 +86,16 @@ security:
 By default, the bundle will use a default Shibboleth user provider.
 This is an in-memory user provider that will get your user on the fly, based on the server attributes.
 
+You can setup the firewall to check specific attribute requirements before authentication.
+By default, this is set to the Shib-Identity-Provider needed to be 'urn:mace:kuleuven.be:kulassoc:kuleuven.be'.
+
+```yml
+# app/config/config.yml
+...
+kuleuven_authentication:
+    authentication_attribute_requirements: { Shib-Identity-Provider: 'urn:mace:kuleuven.be:kulassoc:kuleuven.be' }
+```
+
 Setup Shibboleth in the .htaccess file in your public folder
 ------------------------------------------------------------
 
