@@ -92,6 +92,7 @@ class ShibbolethServiceProvider implements AttributesByUsernameProviderInterface
      * @param string                                $sessionLogoutPath
      * @param string                                $sessionOverviewPath
      * @param string                                $usernameAttribute
+     * @param string                                $authenticatedAttribute
      * @param string                                $logoutUrlAttribute
      * @param array                                 $authenticationRequirements
      * @param string                                $defaultCharset

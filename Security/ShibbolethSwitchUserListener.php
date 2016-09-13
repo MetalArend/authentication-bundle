@@ -30,7 +30,6 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
     protected $userChecker;
     protected $providerKey;
     protected $accessDecisionManager;
-    protected $logger;
     protected $usernameParameter;
     protected $role;
     protected $dispatcher;
@@ -56,7 +55,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $this->userChecker = $userChecker;
         $this->providerKey = $providerKey;
         $this->accessDecisionManager = $accessDecisionManager;
-        $this->logger = $logger;
+        $this->setLogger($logger); // use LoggerTrait
         $this->usernameParameter = $usernameParameter;
         $this->role = $role;
         $this->dispatcher = $dispatcher;
