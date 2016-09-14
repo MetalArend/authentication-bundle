@@ -483,3 +483,8 @@ Extra
 -----
 - Send notice if LDAP filter returns more than 1 user
 - Provide examples: how to add an automatic user save on visit
+
+References
+==========
+
+[![Reference Status](https://www.versioneye.com/php/kuleuven:authentication-bundle/reference_badge.svg?style=flat-square)](https://www.versioneye.com/php/kuleuven:authentication-bundle/references)
