@@ -55,7 +55,10 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         $this->userChecker = $userChecker;
         $this->providerKey = $providerKey;
         $this->accessDecisionManager = $accessDecisionManager;
-        $this->setLogger($logger); // use LoggerTrait
+        // use LoggerTrait
+        if (!empty($logger)) {
+            $this->setLogger($logger);
+        }
         $this->usernameParameter = $usernameParameter;
         $this->role = $role;
         $this->dispatcher = $dispatcher;
@@ -136,10 +139,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
             }
             if ($originalToken->getUsername() === $username) {
                 $this->log(sprintf('Original token is already for "%s", switching to original token: %s', $username, $originalToken));
-                if (null !== $this->dispatcher) {
-                    $switchEvent = new ShibbolethSwitchUserEvent($request, $originalToken->getUser(), $originalToken);
-                    $this->dispatcher->dispatch(SecurityEvents::SWITCH_USER, $switchEvent);
-                }
+                $this->dispatchSwitchUserEvent($request, $token);
                 return $originalToken;
             }
         } elseif (false === $this->accessDecisionManager->decide($token, [$this->role])) {
@@ -165,12 +165,7 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
 
         $token = new KuleuvenUserToken($user, $attributes, $this->providerKey, $roles);
         $token->setAuthenticated(true);
-
-        if (null !== $this->dispatcher) {
-            $switchEvent = new ShibbolethSwitchUserEvent($request, $token->getUser(), $token);
-            $this->dispatcher->dispatch(SecurityEvents::SWITCH_USER, $switchEvent);
-        }
-
+        $this->dispatchSwitchUserEvent($request, $token);
         return $token;
     }
 
@@ -189,5 +184,13 @@ class ShibbolethSwitchUserListener implements ListenerInterface, LoggerAwareInte
         }
 
         return false;
+    }
+
+    private function dispatchSwitchUserEvent(Request $request, KuleuvenUserToken $token)
+    {
+        if (null !== $this->dispatcher) {
+            $switchEvent = new ShibbolethSwitchUserEvent($request, $token->getUser(), $token);
+            $this->dispatcher->dispatch(SecurityEvents::SWITCH_USER, $switchEvent);
+        }
     }
 }
